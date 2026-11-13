@@ -30,6 +30,8 @@ const SPRITES := {
 	"icon_wall": {"path": "res://assets/sprites/icon_wall.png", "size": Vector2(28, 28)},
 	"icon_coin": {"path": "res://assets/sprites/icon_coin.png", "size": Vector2(26, 26)},
 	"icon_enemy": {"path": "res://assets/sprites/icon_enemy.png", "size": Vector2(26, 26)},
+	"icon_slinger": {"path": "res://assets/sprites/icon_slinger.png", "size": Vector2(26, 26)},
+	"icon_catapult": {"path": "res://assets/sprites/icon_catapult.png", "size": Vector2(30, 26)},
 }
 
 

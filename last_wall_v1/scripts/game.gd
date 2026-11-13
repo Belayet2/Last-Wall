@@ -11,6 +11,7 @@ const FxData = preload("res://scripts/data/fx_data.gd")
 const WallScript = preload("res://scripts/wall.gd")
 const HeroScript = preload("res://scripts/hero.gd")
 const EnemyScript = preload("res://scripts/enemy.gd")
+const EnemyData = preload("res://scripts/data/enemy_data.gd")
 const HudScript = preload("res://scripts/hud.gd")
 const FxScript = preload("res://scripts/fx.gd")
 
@@ -61,10 +62,10 @@ func _ready() -> void:
 	_hud.action_chosen.connect(_on_action)
 	_hud.setup_wall(number, level["title"])
 	_hud.set_wall_hp(start_hp, max_hp)
-	_hud.set_enemy_count(_alive)
+	_hud.set_enemies(_enemy_icons(level))
 	_hud.set_coins(GameState.coins)
 	GameState.coins_changed.connect(_hud.set_coins)
-	_hud.show_intro(number, level["title"])
+	_hud.show_intro(number, level["title"], level["tip"])
 
 
 func _build_world() -> void:
@@ -96,6 +97,13 @@ func _spawn_enemies(level: Dictionary) -> void:
 		enemy.died.connect(_on_enemy_died)
 		add_child(enemy)
 		_alive += 1
+
+
+func _enemy_icons(level: Dictionary) -> Array:
+	var keys := []
+	for type_key in level["enemies"]:
+		keys.append(EnemyData.TYPES[type_key]["icon"])
+	return keys
 
 
 func _on_enemy_died(enemy: Node) -> void:

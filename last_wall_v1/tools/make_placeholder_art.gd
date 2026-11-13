@@ -61,6 +61,8 @@ func _init() -> void:
 	_save("icon_wall", _icon_wall)
 	_save("icon_coin", _icon_coin)
 	_save("icon_enemy", _icon_enemy)
+	_save("icon_slinger", _icon_slinger)
+	_save("icon_catapult", _icon_catapult)
 	quit()
 
 
@@ -360,23 +362,49 @@ func _slinger(windup: bool) -> Image:
 	return img
 
 
+## Catapult FACING the hero (front view), with a red crewman working the lever.
+## Windup = arm pulled back low with a boulder in the bucket.
+## Standing = arm up against the top bar (it just fired; the boulder leaves from the top).
 func _catapult(windup: bool) -> Image:
 	var img := _img(80, 64)
-	_rect(img, 6, 44, 68, 8, WOOD)
-	_rect(img, 6, 44, 68, 2, WOOD.lightened(0.2))
-	_line(img, 24, 44, 40, 26, WOOD_DARK, 4)
-	_line(img, 56, 44, 40, 26, WOOD_DARK, 4)
+	var boulder := Color8(126, 120, 110)
+	# back wheels peeking out, base frame, front wheels
+	_rect(img, 4, 44, 8, 18, WOOD_DARK)
+	_rect(img, 52, 44, 8, 18, WOOD_DARK)
+	_rect(img, 6, 46, 4, 14, STEEL_DARK)
+	_rect(img, 54, 46, 4, 14, STEEL_DARK)
+	_rect(img, 10, 46, 44, 9, WOOD)
+	_rect(img, 10, 46, 44, 2, WOOD.lightened(0.2))
+	# uprights and the top bar the arm hits
+	_rect(img, 14, 16, 5, 31, WOOD_DARK)
+	_rect(img, 45, 16, 5, 31, WOOD_DARK)
+	_rect(img, 12, 14, 40, 6, WOOD)
+	_rect(img, 12, 14, 40, 1, WOOD.lightened(0.25))
+	_rect(img, 27, 14, 10, 6, LEATHER)
 	if windup:
-		_line(img, 36, 30, 72, 40, WOOD, 4)        # arm pulled back, loaded
-		_ellipse(img, 72, 38, 7, 5, WOOD_DARK)
-		_circle(img, 72, 34, 5.5, Color8(126, 120, 110))
+		_rect(img, 30, 30, 4, 18, WOOD.darkened(0.1))      # arm pulled back (short, low)
+		_ellipse(img, 32, 30, 7, 4, WOOD_DARK)               # bucket
+		_circle(img, 32, 26, 6, boulder)                      # loaded boulder
+		_circle(img, 30, 24, 2, boulder.lightened(0.25))
+		_line(img, 34, 40, 63, 36, Color8(150, 120, 80))     # rope to the crewman
 	else:
-		_line(img, 40, 30, 60, 6, WOOD, 4)         # arm up, empty
-		_ellipse(img, 61, 6, 7, 5, WOOD_DARK)
-	_circle(img, 18, 54, 9, WOOD_DARK)
-	_circle(img, 62, 54, 9, WOOD_DARK)
-	_circle(img, 18, 54, 3, STEEL_DARK)
-	_circle(img, 62, 54, 3, STEEL_DARK)
+		_rect(img, 30, 6, 4, 42, WOOD)                       # arm up against the bar
+		_ellipse(img, 32, 6, 7, 4, WOOD_DARK)                # empty bucket
+	# crewman (enemy soldier) at the lever
+	var tunic := ENEMY_RED
+	_rect(img, 63, 54, 4, 9, Color8(64, 44, 38))
+	_rect(img, 69, 54, 4, 9, Color8(64, 44, 38))
+	_rect(img, 61, 38, 14, 17, tunic)
+	_rect(img, 61, 50, 14, 2, Color8(70, 50, 40))
+	_circle(img, 68, 32, 6, ENEMY_SKIN)
+	_ellipse(img, 68, 28, 7, 4, Color8(66, 60, 66))
+	_rect(img, 65, 32, 2, 2, INK)
+	_rect(img, 70, 32, 2, 2, INK)
+	if windup:
+		_rect(img, 58, 38, 5, 4, ENEMY_SKIN)                 # hands pulling the rope
+	else:
+		_rect(img, 74, 26, 4, 12, tunic.darkened(0.2))      # arm raised: "fire!"
+		_circle(img, 76, 25, 2.5, ENEMY_SKIN)
 	_outline(img)
 	return img
 
@@ -592,5 +620,26 @@ func _icon_enemy() -> Image:
 	_rect(img, 5, 0, 2, 4, Color8(80, 74, 80))
 	_rect(img, 1, 8, 10, 2, ENEMY_RED)
 	_rect(img, 3, 5, 2, 1, Color8(150, 146, 152))
+	_outline(img)
+	return img
+
+
+func _icon_slinger() -> Image:
+	var img := _img(12, 12)
+	_ellipse(img, 6, 6, 5, 5, Color8(96, 44, 34))      # hood
+	_ellipse(img, 6, 7, 3, 3, ENEMY_SKIN)              # face
+	_rect(img, 4, 7, 1, 1, INK)
+	_rect(img, 7, 7, 1, 1, INK)
+	_outline(img)
+	return img
+
+
+func _icon_catapult() -> Image:
+	var img := _img(14, 12)
+	_rect(img, 1, 8, 12, 3, WOOD)
+	_rect(img, 2, 3, 2, 6, WOOD_DARK)
+	_rect(img, 10, 3, 2, 6, WOOD_DARK)
+	_rect(img, 1, 2, 12, 2, WOOD)
+	_circle(img, 7, 6, 2, Color8(126, 120, 110))
 	_outline(img)
 	return img

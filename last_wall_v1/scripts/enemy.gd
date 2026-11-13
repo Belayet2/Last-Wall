@@ -80,18 +80,21 @@ func _throw_origin() -> Vector2:
 
 
 func _start_windup() -> void:
+	var windup_time: float = data.get("windup_time", EnemyData.WINDUP_TIME)
 	_winding = true
 	add_to_group("threat")
 	var margin := EnemyData.TARGET_EDGE_MARGIN
 	_target = Vector2(randf_range(GameData.FIELD_LEFT + margin, GameData.FIELD_RIGHT - margin), GameData.WALL_TOP + 10.0)
 	var start := _throw_origin()
 	var t := (GameData.CATCH_Y - start.y) / (_target.y - start.y)
-	_marker = ArtData.make_sprite("marker")
+	var stone_size: float = data["stone_size"]
+	var mark_scale := clampf(stone_size / EnemyData.MARKER_BASE_STONE, EnemyData.MARKER_SCALE_MIN, EnemyData.MARKER_SCALE_MAX)
+	_marker = ArtData.make_sprite("marker", ArtData.size_of("marker") * mark_scale)
 	_marker.position = Vector2(lerpf(start.x, _target.x, t), GameData.MARKER_Y)
 	_marker.modulate.a = 0.0
 	_markers_parent.add_child(_marker)
 	var marker_tween := _marker.create_tween()
-	marker_tween.tween_property(_marker, "modulate:a", 1.0, EnemyData.WINDUP_TIME * 0.5)
+	marker_tween.tween_property(_marker, "modulate:a", 1.0, windup_time * 0.5)
 	var base_scale := _marker.scale
 	var pulse := _marker.create_tween().set_loops()
 	pulse.tween_property(_marker, "scale", base_scale * FxData.MARKER_PULSE, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
@@ -100,8 +103,8 @@ func _start_windup() -> void:
 	ArtData.apply(_sprite, data["windup_sprite"], _body_size)
 	_windup = create_tween()
 	_windup.set_parallel(true)
-	_windup.tween_property(_sprite, "position", Vector2(0, -3), EnemyData.WINDUP_TIME)
-	_windup.tween_property(_sprite, "modulate", Color(1.3, 1.15, 1.05), EnemyData.WINDUP_TIME)
+	_windup.tween_property(_sprite, "position", Vector2(0, -3), windup_time)
+	_windup.tween_property(_sprite, "modulate", Color(1.3, 1.15, 1.05), windup_time)
 	_windup.chain().tween_callback(_throw)
 
 

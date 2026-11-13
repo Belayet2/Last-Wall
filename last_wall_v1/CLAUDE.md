@@ -65,6 +65,9 @@ The world fills the **whole screen** (no side panels). Top to bottom:
 - **Shield aura:** the shield is "powerful": a thin **golden arc** above it is the real bounce zone. It explains why every stone bounces, flies back faster, and curves toward enemies. The Shield Aura upgrade makes the arc wider; the shield itself never grows.
 - **Team colors:** kingdom = blue + gold (hero cape, banners on our wall). Enemies = red (tunics, banners on the ruins). Bounced stones turn gold like the aura.
 - **Enemies:** stone throwers standing on rubble, facing the hero. Two poses: standing (stone held low) and **windup** (arm raised with the stone). The stone leaves from the raised hand.
+  - **Slinger:** hooded, spins a sling over its head in the windup pose.
+  - **Catapult:** drawn **facing the hero** with a red crewman. Windup = arm pulled back with a boulder; after firing the arm is up against the top bar and the boulder leaves from the top. Longer windup (1.1 s) and bigger landing mark.
+  - Each type has its own HUD icon, and each wall's intro shows a one-line tip about its new enemy (`tip` in `level_data.gd`).
 - **Wall:** 3 looks by HP: **whole** (>60%), **cracked** (>0%), **broken** (0%: rubble, hole where the door was). The door is decoration only.
 
 ---

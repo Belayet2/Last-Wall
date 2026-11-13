@@ -30,6 +30,7 @@ var _enemy_icons: Array[TextureRect] = []
 var _intro: VBoxContainer
 var _intro_title: Label
 var _intro_sub: Label
+var _intro_tip: Label
 var _dim: ColorRect
 var _msg_panel: PanelContainer
 var _msg_title: Label
@@ -77,12 +78,13 @@ func set_coins(coins: int) -> void:
 		create_tween().tween_property(_coins_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
-func set_enemy_count(count: int) -> void:
+## One icon per enemy, left to right (keys from art_data.gd).
+func set_enemies(icon_keys: Array) -> void:
 	for icon in _enemy_icons:
 		icon.queue_free()
 	_enemy_icons.clear()
-	for i in range(count):
-		var icon := UI.icon("icon_enemy")
+	for key in icon_keys:
+		var icon := UI.icon(key)
 		_enemy_row.add_child(icon)
 		_enemy_icons.append(icon)
 
@@ -97,9 +99,10 @@ func mark_enemy_down(i: int) -> void:
 	create_tween().tween_property(icon, "scale", Vector2.ONE, 0.2)
 
 
-func show_intro(number: int, title: String) -> void:
+func show_intro(number: int, title: String, tip: String) -> void:
 	_intro_title.text = "WALL %d" % number
 	_intro_sub.text = title
+	_intro_tip.text = tip
 	_intro.modulate.a = 0.0
 	_intro.visible = true
 	var t := create_tween()
@@ -257,7 +260,8 @@ func _build_intro() -> void:
 	_intro.add_child(_intro_title)
 	_intro_sub = UI.centered(UI.world_label("", 26))
 	_intro.add_child(_intro_sub)
-	_intro.add_child(UI.centered(UI.world_label("Move with A / D or the arrow keys.  Stand on the red marks to block.", 18)))
+	_intro_tip = UI.centered(UI.world_label("", 18))
+	_intro.add_child(_intro_tip)
 
 
 func _build_message() -> void:
