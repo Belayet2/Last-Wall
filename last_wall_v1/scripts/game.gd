@@ -66,6 +66,8 @@ func _ready() -> void:
 	_hud.set_coins(GameState.coins)
 	GameState.coins_changed.connect(_hud.set_coins)
 	_hud.show_intro(number, level["title"], level["tip"])
+	GameState.audio.start_music()
+	GameState.audio.play("horn")
 
 
 ## Background used by the game and the main menu.
@@ -111,6 +113,7 @@ func _on_enemy_died(enemy: Node) -> void:
 	var coins: int = enemy.data["coins"]
 	GameState.add_coins(coins)
 	GameState.enemies_defeated += 1
+	GameState.audio.play("coin")
 	_fx.float_text((enemy as Node2D).global_position + Vector2(0, FxData.COIN_TEXT_OFFSET_Y), "+%d" % coins, FxData.COIN_COLOR)
 	_fx.hit_stop()
 	_alive -= 1
@@ -125,6 +128,7 @@ func _on_wave_cleared() -> void:
 	var number := GameState.current_wall
 	var bonus := GameState.wave_cleared()
 	_wall.heal_full()
+	GameState.audio.play("wall_held")
 	_fx.float_text(Vector2(GameData.FIELD_CENTER_X, GameData.WALL_TOP - 10), "Retake bonus +%d" % bonus, FxData.COIN_COLOR)
 	if GameState.is_last_wall():
 		_finish("win", "Victory!", "Every wall is ours again.")
@@ -144,6 +148,7 @@ func _on_wall_fallen() -> void:
 	if lost == 1:
 		_finish("lose", "The Last Wall Fell", "There is no wall left to fall back to.")
 		return
+	GameState.audio.play("wall_fell")
 	GameState.fall_back()
 	var back := GameState.current_wall
 	_continue_text = "Defend Wall %d" % back

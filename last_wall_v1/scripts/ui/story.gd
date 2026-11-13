@@ -81,6 +81,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _next() -> void:
 	_index += 1
+	if _index > 0:
+		GameState.audio.play("click")
 	if _index >= StoryData.LINES.size():
 		_start_game()
 		return

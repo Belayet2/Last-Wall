@@ -58,10 +58,12 @@ func _physics_process(delta: float) -> void:
 		position.x = GameData.FIELD_LEFT + r
 		velocity.x = absf(velocity.x)
 		_puff(Vector2(GameData.FIELD_LEFT, position.y), FxData.SMALL_DUST)
+		GameState.audio.play("tap")
 	elif position.x > GameData.FIELD_RIGHT - r:
 		position.x = GameData.FIELD_RIGHT - r
 		velocity.x = -absf(velocity.x)
 		_puff(Vector2(GameData.FIELD_RIGHT, position.y), FxData.SMALL_DUST)
+		GameState.audio.play("tap")
 	_life += delta
 	if _life > GameData.STONE_LIFETIME or position.y < -40.0 or position.y > 760.0:
 		remove()
@@ -79,6 +81,7 @@ func _on_area_entered(area) -> void:
 		area.bounce_stone(self)
 	elif area.is_in_group("wall"):
 		area.take_damage(wall_damage, global_position)
+		GameState.audio.play("wall_hit")
 		_puff(global_position, FxData.DUST)
 		remove()
 

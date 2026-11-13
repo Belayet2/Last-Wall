@@ -82,6 +82,7 @@ func bounce_stone(stone) -> void:
 	stone.global_position.y = minf(stone_pos.y, surface_y - float(stone.diameter) * 0.5)
 	stone.make_returned(dir * speed)
 	_flash_aura()
+	GameState.audio.play("bounce")
 	var fx := get_tree().get_first_node_in_group("fx")
 	if fx:
 		fx.burst(Vector2(stone_pos.x, surface_y), FxData.SPARKS, dir)

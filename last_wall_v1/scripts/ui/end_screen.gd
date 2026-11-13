@@ -12,6 +12,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var won := GameState.last_result == "win"
 	var info: Dictionary = StoryData.WIN if won else StoryData.LOSE
+	GameState.audio.play("victory" if won else "defeat")
 
 	var bg := TextureRect.new()
 	bg.texture = ArtData.texture("story_throne_room")

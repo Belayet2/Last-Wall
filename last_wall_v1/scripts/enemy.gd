@@ -120,6 +120,7 @@ func _throw() -> void:
 	stone.marker = _marker
 	_marker = null
 	_stones_parent.add_child(stone)
+	GameState.audio.play("throw")
 
 	ArtData.apply(_sprite, data["sprite"], _body_size)
 	var back := create_tween()
@@ -146,6 +147,8 @@ func take_damage(amount: int) -> void:
 	_knock.tween_property(self, "position", _home, FxData.KNOCKBACK_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if hp <= 0:
 		_die()
+	else:
+		GameState.audio.play("enemy_hit")
 
 
 func _die() -> void:
@@ -158,6 +161,7 @@ func _die() -> void:
 		_marker.queue_free()
 	_marker = null
 	set_deferred("monitorable", false)
+	GameState.audio.play("enemy_down")
 	var fx := get_tree().get_first_node_in_group("fx")
 	if fx:
 		fx.burst(global_position, FxData.ENEMY_BURST)

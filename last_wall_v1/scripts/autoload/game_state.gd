@@ -7,7 +7,11 @@ signal coins_changed(coins: int)
 const ShopData = preload("res://scripts/data/shop_data.gd")
 const LevelData = preload("res://scripts/data/level_data.gd")
 
+const AudioScript = preload("res://scripts/audio.gd")
+
 const FALLEN := -1   # wall_hp value for a wall the enemy holds
+
+var audio: AudioScript   # sound effects + music (child node, survives scene changes)
 
 var coins := 0
 var current_wall := 1
@@ -23,6 +27,8 @@ var coins_earned := 0
 
 
 func _ready() -> void:
+	audio = AudioScript.new()
+	add_child(audio)
 	reset()
 
 

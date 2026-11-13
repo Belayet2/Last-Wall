@@ -52,11 +52,11 @@ func _ready() -> void:
 	if not OS.has_feature("web"):
 		var quit := UI.button("Quit", false, Vector2(240, 46), 22)
 		quit.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		quit.pressed.connect(func() -> void: get_tree().quit())
+		quit.pressed.connect(func() -> void: GameState.audio.quit_game())
 		col.add_child(quit)
 	play.grab_focus()
 
-	var hint := UI.centered(UI.world_label("A / D or arrow keys to move     Esc to pause", 18))
+	var hint := UI.centered(UI.world_label("A / D or arrow keys to move     Esc to pause     M to mute", 18))
 	hint.position = Vector2(0, 684)
 	hint.size = Vector2(GameData.SCREEN_WIDTH, 30)
 	root.add_child(hint)
@@ -68,4 +68,5 @@ func _ready() -> void:
 
 
 func _on_play() -> void:
+	GameState.audio.start_music()   # first click: browsers allow sound from now on
 	get_tree().change_scene_to_file("res://scenes/story.tscn")

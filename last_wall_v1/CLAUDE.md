@@ -202,6 +202,7 @@ All values in `scripts/data/shop_data.gd`.
 ## 10. Tech rules
 
 - Renderer **Compatibility**. GDScript only. No file saves, no networking.
-- `GameState` is the only autoload (coins, upgrade levels, current wall, per-wall HP, signals).
+- `GameState` is the only autoload (coins, upgrade levels, current wall, per-wall HP, signals). It owns the audio player as a child: `GameState.audio.play("name")`, `GameState.audio.start_music()` (called on the Play click), `GameState.audio.quit_game()` (stops sounds, then quits; use it instead of `get_tree().quit()`). M mutes.
+- Sounds: `assets/audio/<name>.ogg` or `.wav` (.ogg wins), list and volumes in `scripts/data/audio_data.gd`. Placeholders are synthesized by `tools/make_placeholder_audio.gd`. Replace guide: `assets/README.md`.
 - Use signals between nodes (`wall_fallen`, `enemy_died`, `wave_cleared`, `coins_changed`).
 - Collision layers: 1 `shield`, 2 `hostile_stone`, 3 `returned_stone`, 4 `enemy`, 5 `wall`, 6 `world_edge`.

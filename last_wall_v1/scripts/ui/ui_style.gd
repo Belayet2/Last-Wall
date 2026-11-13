@@ -102,6 +102,7 @@ static func button(text: String, primary: bool = true, min_size: Vector2 = Vecto
 	focus.expand_margin_top = 3
 	focus.expand_margin_bottom = 3
 	b.add_theme_stylebox_override("focus", focus)
+	b.pressed.connect(func() -> void: GameState.audio.play("click"))
 	return b
 
 

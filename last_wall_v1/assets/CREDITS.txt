@@ -1,0 +1,7 @@
+LAST WALL - credits
+
+Placeholder art: drawn by code (tools/make_placeholder_art.gd) for this project.
+Placeholder sounds and music: synthesized by code (tools/make_placeholder_audio.gd) for this project.
+
+When you add art or sounds from somewhere else, list each one here:
+  file name  -  author  -  source link  -  license (for example CC0)

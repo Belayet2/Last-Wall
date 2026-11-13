@@ -62,6 +62,7 @@ func take_damage(amount: int, hit_pos: Vector2) -> void:
 	if fx:
 		fx.float_text(hit_pos + Vector2(0, -20), "-%d" % amount, FxData.DAMAGE_COLOR)
 		if changed:
+			GameState.audio.play("wall_crack")
 			fx.shake(FxData.SHAKE_WALL_CRACK)
 			fx.burst(Vector2(GameData.FIELD_CENTER_X, GameData.WALL_TOP), FxData.WALL_RUBBLE)
 		else:

@@ -115,12 +115,14 @@ func _row_base(col: VBoxContainer, row_name: String, desc: String) -> HBoxContai
 
 
 func _on_buy(key: String) -> void:
-	GameState.buy_upgrade(key)
+	if GameState.buy_upgrade(key):
+		GameState.audio.play("buy")
 	_refresh()
 
 
 func _on_repair() -> void:
-	GameState.buy_repair()
+	if GameState.buy_repair():
+		GameState.audio.play("buy")
 	_refresh()
 
 
