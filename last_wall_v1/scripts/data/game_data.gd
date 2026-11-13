@@ -1,9 +1,11 @@
 ## Layout and core feel numbers. Tune freely.
 
-# --- Play field (x range inside the 1280 wide window) ---
-const FIELD_LEFT := 260.0
-const FIELD_RIGHT := 1020.0
-const FIELD_CENTER_X := (FIELD_LEFT + FIELD_RIGHT) / 2.0
+# --- Play field (full 1280 width; rocky edges on both sides) ---
+const SCREEN_WIDTH := 1280.0
+const FIELD_LEFT := 34.0        # stones bounce off the rocks here
+const FIELD_RIGHT := 1246.0
+const FIELD_CENTER_X := 640.0
+const EDGE_ROCKS_X := 20.0      # center of the left rock strip (right one is mirrored)
 
 # --- Rows from top to bottom ---
 const RUINS_TOP := 0.0
@@ -16,16 +18,30 @@ const WALL_TOP := 625.0
 const WALL_HEIGHT := 95.0
 
 const ENEMY_Y := 112.0          # center of the enemy row
-const HERO_Y := 590.0           # center of the hero sprite
+const HERO_Y := 571.0           # center of the hero sprite (feet on the path)
+const HERO_SHADOW_Y := 48.0     # shadow under the hero's feet (relative to the hero)
+const MARKER_Y := 606.0         # landing markers are drawn on the path at this height
 
-# --- Hero and shield ---
-const SHIELD_OFFSET_Y := -42.0  # shield center relative to hero center
-const SHIELD_Y := HERO_Y + SHIELD_OFFSET_Y
-const SHIELD_HEIGHT := 16.0     # collision height
-const SHIELD_SPRITE_HEIGHT := 24.0
+# --- Shield and its golden aura (the aura is the bounce zone) ---
+const SHIELD_CENTER_Y := -36.0  # shield center relative to the hero
+const AURA_HEIGHT := 42.0       # how far the aura arc rises above the shield center
+const AURA_THICKNESS := 10.0    # collision thickness under the arc ends
+const AURA_POINTS := 24
+const AURA_COLOR := Color(1.0, 0.84, 0.35)
+const AURA_ALPHA := 0.6
+const AURA_WIDTH := 3.0
+const AURA_GLOW_WIDTH := 12.0
+const AURA_GLOW_ALPHA := 0.2
+# Height where stones meet the aura (used to place landing markers).
+const CATCH_Y := HERO_Y + SHIELD_CENTER_Y - AURA_HEIGHT * 0.7
+
 const MAX_BOUNCE_ANGLE_DEG := 45.0   # edge hit tilts the bounce this much
 const RETURN_SPEED_MULT := 1.6       # returned stone speed = hostile speed * this
-const HERO_LEAN := 0.08              # little lean when walking (radians)
+
+# --- Hero feel ---
+const HERO_LEAN := 0.06              # little lean when walking (radians)
+const HERO_BOB := 2.0                # walking bob height (px)
+const HERO_BOB_SPEED := 14.0
 
 # --- Stones ---
 const STONE_LIFETIME := 8.0
@@ -34,5 +50,7 @@ const STONE_SPIN := 6.0              # visual spin speed (radians/second)
 # --- Wall looks ---
 const WALL_CRACKED_BELOW := 0.6      # under 60% HP the wall looks cracked
 
-# --- End of wave ---
+# --- Wave intro and end ---
+const INTRO_HOLD := 1.8              # seconds the "WALL 1" title stays
+const INTRO_FADE := 0.6
 const END_PAUSE_DELAY := 0.5         # seconds before the game freezes after win/lose

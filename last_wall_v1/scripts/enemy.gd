@@ -1,6 +1,7 @@
 extends Area2D
-## An enemy standing on the ruins. Never moves. Winds up, then throws a stone.
-## A red landing marker shows where the stone will cross the shield line.
+## An enemy standing on the ruins, facing the hero. Never moves.
+## Raises its arm (windup pose), then throws a stone from its hand.
+## A red landing marker on the path shows where to stand to block it.
 
 signal died(enemy: Node)
 
@@ -10,6 +11,7 @@ const EnemyData = preload("res://scripts/data/enemy_data.gd")
 const StoneScript = preload("res://scripts/stone.gd")
 
 var type_key := "thrower"
+var index := 0
 var data: Dictionary = {}
 var hp := 1
 var max_stones := 2
@@ -18,6 +20,7 @@ var dead := false
 var _stones_parent: Node
 var _markers_parent: Node
 var _sprite: Sprite2D
+var _body_size := Vector2.ZERO
 var _timer := 0.0
 var _winding := false
 var _target := Vector2.ZERO
@@ -26,8 +29,9 @@ var _windup: Tween
 var _flash: Tween
 
 
-func setup(key: String, stone_cap: int, stones_parent: Node, markers_parent: Node) -> void:
+func setup(key: String, enemy_index: int, stone_cap: int, stones_parent: Node, markers_parent: Node) -> void:
 	type_key = key
+	index = enemy_index
 	max_stones = stone_cap
 	_stones_parent = stones_parent
 	_markers_parent = markers_parent
@@ -36,17 +40,20 @@ func setup(key: String, stone_cap: int, stones_parent: Node, markers_parent: Nod
 func _ready() -> void:
 	data = EnemyData.TYPES[type_key]
 	hp = data["hp"]
+	_body_size = data["size"]
 	add_to_group("enemies")
 	collision_layer = 8
 	collision_mask = 0
 	monitoring = false
 	var rect := RectangleShape2D.new()
-	var body_size: Vector2 = data["size"]
-	rect.size = body_size * EnemyData.HITBOX_SCALE
+	rect.size = _body_size * EnemyData.HITBOX_SCALE
 	var cs := CollisionShape2D.new()
 	cs.shape = rect
 	add_child(cs)
-	_sprite = ArtData.make_sprite(data["sprite"], data["size"])
+	var shadow := ArtData.make_sprite("shadow", Vector2(_body_size.x * 1.1, 12))
+	shadow.position = Vector2(0, _body_size.y * 0.5 - 2)
+	add_child(shadow)
+	_sprite = ArtData.make_sprite(data["sprite"], _body_size)
 	add_child(_sprite)
 	_timer = randf_range(EnemyData.FIRST_THROW_DELAY_MIN, data["throw_interval"])
 
@@ -64,8 +71,8 @@ func _process(delta: float) -> void:
 
 
 func _throw_origin() -> Vector2:
-	var size: Vector2 = data["size"]
-	return global_position + Vector2(0, size.y * 0.3)
+	var hand: Vector2 = data["hand"]
+	return global_position + hand
 
 
 func _start_windup() -> void:
@@ -74,18 +81,19 @@ func _start_windup() -> void:
 	var margin := EnemyData.TARGET_EDGE_MARGIN
 	_target = Vector2(randf_range(GameData.FIELD_LEFT + margin, GameData.FIELD_RIGHT - margin), GameData.WALL_TOP + 10.0)
 	var start := _throw_origin()
-	var t := (GameData.SHIELD_Y - start.y) / (_target.y - start.y)
+	var t := (GameData.CATCH_Y - start.y) / (_target.y - start.y)
 	_marker = ArtData.make_sprite("marker")
-	_marker.position = Vector2(lerpf(start.x, _target.x, t), GameData.SHIELD_Y)
+	_marker.position = Vector2(lerpf(start.x, _target.x, t), GameData.MARKER_Y)
 	_marker.modulate.a = 0.0
 	_markers_parent.add_child(_marker)
 	var marker_tween := _marker.create_tween()
 	marker_tween.tween_property(_marker, "modulate:a", 1.0, EnemyData.WINDUP_TIME * 0.5)
 
+	ArtData.apply(_sprite, data["windup_sprite"], _body_size)
 	_windup = create_tween()
 	_windup.set_parallel(true)
-	_windup.tween_property(_sprite, "position", Vector2(0, -6), EnemyData.WINDUP_TIME)
-	_windup.tween_property(_sprite, "modulate", Color(1.5, 1.25, 1.1), EnemyData.WINDUP_TIME)
+	_windup.tween_property(_sprite, "position", Vector2(0, -3), EnemyData.WINDUP_TIME)
+	_windup.tween_property(_sprite, "modulate", Color(1.3, 1.15, 1.05), EnemyData.WINDUP_TIME)
 	_windup.chain().tween_callback(_throw)
 
 
@@ -102,6 +110,7 @@ func _throw() -> void:
 	_marker = null
 	_stones_parent.add_child(stone)
 
+	ArtData.apply(_sprite, data["sprite"], _body_size)
 	var back := create_tween()
 	back.set_parallel(true)
 	back.tween_property(_sprite, "position", Vector2.ZERO, 0.12)

@@ -33,24 +33,24 @@ The war was won, but most soldiers died. Enemies came back in greater numbers an
 
 ## 2. Screen layout (1280×720 window, stretch `canvas_items`, aspect `keep`)
 
-Top to bottom:
+The world fills the **whole screen** (no side panels). Top to bottom:
 
 ```
- ┌───────────────────────────────────────────┐
- │  ENEMY SIDE: ruins of the captured wall,  │  enemies stand here and throw stones
- │  enemies in a row (they never advance)    │
- ├───────────────────────────────────────────┤
- │  FIELD: open ground, stones fly here      │  landing markers show on the path
- ├───────────────────────────────────────────┤
- │  PATH: hero walks left/right with shield  │
- ├───────────────────────────────────────────┤
- │  WALL with a DOOR (decoration only)       │  full width, behind the hero
- └───────────────────────────────────────────┘
+ ┌───────────────────────────────────────────────────────┐
+ │ [Wall 1 + HP bar]     [enemy helmets]        [coins]  │  HUD: small panels over the sky
+ │  ENEMY SIDE: ruins of the captured wall, enemies in   │  enemies stand here and throw stones
+ │  a row (they never advance)                           │
+ │▓ FIELD: open ground, stones fly here                 ▓│  rocky edges left/right: stones bounce
+ │▓ PATH: hero walks left/right (red landing marks here)▓│
+ │  WALL with a DOOR (decoration only), full width       │  behind the hero
+ └───────────────────────────────────────────────────────┘
 ```
 
 - The hero **only moves left/right** on the path (A/D or arrows). No up/down. No shield rotation. No mouse in gameplay.
-- Left and right screen edges are solid: stones bounce off them.
+- Rocky edges on the left and right of the field are solid: stones bounce off them.
 - The background is **land, not sea**: the enemies stand on the rubble of the outer wall they captured.
+- **Camera:** we look over the hero's shoulder toward the enemies. The hero is seen **from behind**; enemies face us. Things near the bottom (hero) are bigger than things at the top (enemies).
+- **HUD:** only small dark panels with a gold border along the top edge (over the sky): wall number, name and HP bar (left), one helmet icon per enemy that grays out when it falls (middle), coins (right). Wave intro title in the middle of the field at the start; pause/end messages in a centered panel with a button.
 
 ---
 
@@ -59,8 +59,11 @@ Top to bottom:
 - **Throwables are STONES** (hard and round, so bouncing off a shield looks believable).
   - Hostile stone: gray/brown.
   - Returned stone: same stone with a **bright glow/trail** (gold) so the player sees "this one is mine now".
-- **Shield:** a big round/kite shield held **above the hero's head**, a bit wider than the hero.
-- **Enemies:** stone throwers standing on rubble. They **wind up** (raise an arm) before every throw.
+- **Hero:** seen from behind: helmet with plume, **blue cape** (the kingdom's color), sword in the right hand.
+- **Shield:** a **normal-size round shield** (about 1.7× his shoulder width) held up in front of him with his left arm. We see its back (wood, strap, steel rim). Never make the shield look like a plank or many times bigger than the hero.
+- **Shield aura:** the shield is "powerful": a thin **golden arc** above it is the real bounce zone. It explains why every stone bounces, flies back faster, and curves toward enemies. The Shield Aura upgrade makes the arc wider; the shield itself never grows.
+- **Team colors:** kingdom = blue + gold (hero cape, banners on our wall). Enemies = red (tunics, banners on the ruins). Bounced stones turn gold like the aura.
+- **Enemies:** stone throwers standing on rubble, facing the hero. Two poses: standing (stone held low) and **windup** (arm raised with the stone). The stone leaves from the raised hand.
 - **Wall:** 3 looks by HP: **whole** (>60%), **cracked** (>0%), **broken** (0%: rubble, hole where the door was). The door is decoration only.
 
 ---
@@ -72,9 +75,9 @@ Top to bottom:
 - **The hero has no health.** Only the wall has health. Stones pass through the hero's body.
 
 ### 4.2 Shield (always bounces)
-- Flat paddle `Area2D` above the hero, child of the hero, never rotates.
-- **Every stone that touches the shield bounces. 100% of the time. No random chance.**
-- Bounce angle depends on where the stone hits the shield:
+- `Area2D` child of the hero, never rotates. Its collision is a dome matching the golden aura arc (width = `shield_width` upgrade value).
+- **Every stone that touches the aura bounces. 100% of the time. No random chance.**
+- Bounce angle depends on where the stone hits (like a curved surface):
   `offset = clamp((hit_x - shield_x) / (shield_width / 2), -1, 1)`; direction = straight up rotated by `offset * max_bounce_angle` (default 45°).
 - **Aim assist:** after the bounce, turn the direction toward the nearest living enemy by `aim_assist` using `lerp_angle`. Start value is generous so returned stones usually hit someone.
 - Returned stone speed = hostile speed × `return_speed_mult`.
@@ -143,8 +146,8 @@ on wall hp 0:
 
 | Upgrade | Start | Per level | Max level | Cost per level |
 |---|---|---|---|---|
-| **Shield Width** | 150 px | +25 | 3 | 20, 40, 60 |
-| **Move Speed** | 300 px/s | +40 | 3 | 15, 30, 50 |
+| **Shield Aura** (bounce zone width) | 140 px | +25 | 3 | 20, 40, 60 |
+| **Move Speed** | 360 px/s | +40 | 3 | 15, 30, 50 |
 | **Aim Assist** | 0.6 | +0.1 | 3 | 25, 45, 70 |
 | **Stone Power** | +0 dmg | +1 | 2 | 40, 80 |
 | **Repair Next Wall** | — | +25 HP | unlimited | 15 each |
@@ -170,7 +173,8 @@ All values in `scripts/data/shop_data.gd`.
 ## 8. Art and effects
 
 - **Claude makes placeholder art first** as PNG files (simple, readable, consistent palette). The game loads every sprite from a fixed path, so replacing art = overwriting the PNG with one of the same name (any size works; sprites are scaled to a target size set in `scripts/data/art_data.gd`).
-- Files: `assets/sprites/hero.png, shield.png, stone.png, stone_returned.png, enemy_thrower.png, enemy_slinger.png, enemy_catapult.png, wall_whole.png, wall_cracked.png, wall_broken.png, ground.png, ruins.png, marker.png`.
+- Files (all in `assets/sprites/`): `hero, shield, shadow, stone, stone_returned, enemy_thrower(+_windup), enemy_slinger(+_windup), enemy_catapult(+_windup), wall_whole, wall_cracked, wall_broken, ground, path, ruins, edge_rocks, marker, icon_wall, icon_coin, icon_enemy` (`.png`). The list with sizes lives in `scripts/data/art_data.gd`.
+- Placeholders are drawn by `tools/make_placeholder_art.gd` (it never overwrites existing files unless run with `--force` or `--only=name`).
 - `assets/README.md` explains in plain steps how to replace each file and lists its target size. List sources/licenses in `assets/CREDITS.txt`.
 - **Effects (important):** shield flash + spark particles on bounce, dust puff when a stone breaks, screen shake on wall hit, enemy knock-back + pop on death, floating "+coins" text, short hit-stop on a kill, wall crack tween. Sounds later (`.ogg`, made with jsfxr), music after the Play click.
 
