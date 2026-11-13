@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/wall.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wall_full.png" id="2_full"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wall_cracked.png" id="3_cracked"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wall_broken.png" id="4_broken"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(560, 80)
+
+[node name="Wall" type="Area2D"]
+position = Vector2(640, 680)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_script")
+texture_full = ExtResource("2_full")
+texture_cracked = ExtResource("3_cracked")
+texture_broken = ExtResource("4_broken")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(4, 4)
+texture = ExtResource("2_full")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_wall")

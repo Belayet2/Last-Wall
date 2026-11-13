@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Texture2D" path="res://assets/sprites/background.png" id="2_bg"]
+[ext_resource type="PackedScene" path="res://scenes/wall.tscn" id="3_wall"]
+[ext_resource type="PackedScene" path="res://scenes/hero.tscn" id="4_hero"]
+[ext_resource type="Script" path="res://scripts/wave_manager.gd" id="5_wave"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6_hud"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="Background" type="Sprite2D" parent="."]
+position = Vector2(640, 360)
+scale = Vector2(4, 4)
+texture = ExtResource("2_bg")
+
+[node name="Wall" parent="." instance=ExtResource("3_wall")]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Hero" parent="." instance=ExtResource("4_hero")]
+position = Vector2(640, 610)
+
+[node name="Projectiles" type="Node2D" parent="."]
+
+[node name="WaveManager" type="Node" parent="." node_paths=PackedStringArray("enemy_parent")]
+script = ExtResource("5_wave")
+enemy_parent = NodePath("../Enemies")
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]
