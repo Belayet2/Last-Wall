@@ -63,6 +63,10 @@ func _init() -> void:
 	_save("icon_enemy", _icon_enemy)
 	_save("icon_slinger", _icon_slinger)
 	_save("icon_catapult", _icon_catapult)
+	_save("story_throne_room", _throne_room)
+	_save("portrait_king", _portrait_king)
+	_save("portrait_commander", _portrait_commander)
+	_save("portrait_messenger", _portrait_messenger)
 	quit()
 
 
@@ -641,5 +645,157 @@ func _icon_catapult() -> Image:
 	_rect(img, 10, 3, 2, 6, WOOD_DARK)
 	_rect(img, 1, 2, 12, 2, WOOD)
 	_circle(img, 7, 6, 2, Color8(126, 120, 110))
+	_outline(img)
+	return img
+
+
+# ---------------------------------------------------------------- story (drawn small, scaled up in game)
+
+const SKIN_LIGHT := Color8(236, 196, 160)
+
+
+## Bright throne room (640x360, shown at 2x).
+func _throne_room() -> Image:
+	var w := 640
+	var h := 360
+	var img := _img(w, h)
+	_bricks(img, Rect2i(0, 0, w, 250), Color8(228, 218, 198), Color8(194, 182, 160), 40, 20, 0.03)
+	# pillars
+	for px in [30, 570]:
+		_rect(img, px, 0, 40, 250, Color8(238, 230, 212))
+		_rect(img, px, 0, 6, 250, Color8(250, 246, 236))
+		_rect(img, px + 34, 0, 6, 250, Color8(206, 196, 176))
+	# tall windows with sky
+	for wx in [140, 430]:
+		_circle(img, wx + 35, 70, 35, Color8(170, 150, 120))
+		_rect(img, wx, 70, 70, 120, Color8(170, 150, 120))
+		for y in range(40, 186):
+			for x in range(wx + 5, wx + 65):
+				if y >= 70 or _inside(x, y, wx + 35, 70, 30, 30):
+					_put(img, x, y, SKY_TOP.lerp(SKY_LOW, clampf((y - 40) / 150.0, 0, 1)))
+		_rect(img, wx + 33, 40, 4, 146, Color8(170, 150, 120))
+		_rect(img, wx + 5, 112, 60, 4, Color8(170, 150, 120))
+	# banners of the kingdom
+	for bx in [258, 362]:
+		_rect(img, bx - 4, 26, 28, 4, WOOD_DARK)
+		_rect(img, bx, 30, 20, 96, ROYAL)
+		_rect(img, bx, 30, 20, 3, GOLD)
+		_rect(img, bx + 8, 50, 4, 30, GOLD)
+		_rect(img, bx + 2, 58, 16, 4, GOLD)
+	# floor tiles
+	for y in range(250, h, 20):
+		for x in range(0, w, 40):
+			var c := Color8(214, 184, 140) if ((int(x / 40.0) + int(y / 20.0)) % 2 == 0) else Color8(200, 168, 126)
+			_rect(img, x, y, 40, 20, c)
+	_rect(img, 0, 250, w, 3, Color8(176, 150, 112))
+	# carpet + dais + throne
+	_rect(img, 284, 250, 72, 110, ROYAL)
+	_rect(img, 284, 250, 4, 110, GOLD)
+	_rect(img, 352, 250, 4, 110, GOLD)
+	_rect(img, 262, 228, 116, 24, Color8(232, 224, 206))
+	_rect(img, 262, 228, 116, 3, Color8(248, 244, 234))
+	_rect(img, 294, 120, 52, 110, GOLD)
+	_circle(img, 320, 122, 26, GOLD)
+	_rect(img, 302, 130, 36, 76, ROYAL)
+	_circle(img, 320, 130, 18, ROYAL)
+	_rect(img, 286, 196, 68, 14, GOLD.darkened(0.1))
+	_rect(img, 290, 206, 60, 8, ROYAL_DARK)
+	_circle(img, 320, 104, 5, Color8(220, 60, 60))
+	_speckle(img, Rect2i(0, 0, w, h), 8000, 0.025)
+	return img
+
+
+## Shared bust shape: shoulders/body color and head.
+func _bust(img: Image, body: Color, skin: Color) -> void:
+	_ellipse(img, 48, 112, 46, 32, body)
+	_rect(img, 40, 68, 16, 14, skin.darkened(0.12))
+	_ellipse(img, 48, 54, 19, 23, skin)
+
+
+func _portrait_king() -> Image:
+	var img := _img(96, 112)
+	var gray := Color8(206, 206, 212)
+	_bust(img, ROYAL, SKIN_LIGHT)
+	_ellipse(img, 48, 86, 30, 9, Color8(246, 246, 240))           # ermine collar
+	for i in range(6):
+		_rect(img, 26 + i * 9, 84 + (i % 2) * 3, 2, 2, INK)
+	for i in range(9):
+		_rect(img, 32 + i * 4, 95 + absi(i - 4), 3, 2, GOLD)       # gold chain
+	_circle(img, 48, 104, 4, GOLD)
+	_rect(img, 28, 40, 6, 24, gray)                                  # hair sides
+	_rect(img, 62, 40, 6, 24, gray)
+	_ellipse(img, 48, 71, 17, 15, gray)                              # beard
+	_ellipse(img, 48, 62, 10, 3, gray.lightened(0.3))               # moustache
+	_rect(img, 43, 66, 10, 2, Color8(140, 90, 80))
+	_rect(img, 38, 48, 5, 3, Color8(250, 250, 250))
+	_rect(img, 53, 48, 5, 3, Color8(250, 250, 250))
+	_rect(img, 40, 49, 2, 2, INK)
+	_rect(img, 55, 49, 2, 2, INK)
+	_rect(img, 37, 44, 7, 2, gray.darkened(0.2))
+	_rect(img, 52, 44, 7, 2, gray.darkened(0.2))
+	_rect(img, 46, 51, 4, 8, SKIN_LIGHT.darkened(0.1))
+	# crown
+	_rect(img, 28, 26, 40, 9, GOLD)
+	for cx in [30, 39, 48, 57, 64]:
+		var tall := 12 if cx == 48 else 8
+		_rect(img, cx, 26 - tall, 4, tall, GOLD)
+		_circle(img, cx + 2, 26 - tall, 2, GOLD.lightened(0.2))
+	_circle(img, 48, 30, 2.5, Color8(220, 50, 50))
+	_circle(img, 37, 30, 2, Color8(60, 120, 220))
+	_circle(img, 59, 30, 2, Color8(60, 120, 220))
+	_rect(img, 28, 26, 40, 1, GOLD.lightened(0.35))
+	_outline(img)
+	return img
+
+
+func _portrait_commander() -> Image:
+	var img := _img(96, 112)
+	var skin := Color8(222, 178, 140)
+	_bust(img, STEEL, skin)
+	_ellipse(img, 26, 92, 14, 9, STEEL_LIGHT)                       # shoulder plates
+	_ellipse(img, 70, 92, 14, 9, STEEL_LIGHT)
+	_rect(img, 32, 86, 32, 26, ROYAL)                                # tabard
+	_rect(img, 46, 90, 4, 18, GOLD)
+	_rect(img, 40, 96, 16, 4, GOLD)
+	_rect(img, 40, 68, 16, 16, MAIL)                                 # mail neck
+	_ellipse(img, 48, 54, 19, 23, skin)
+	_rect(img, 37, 47, 8, 3, Color8(90, 60, 36))                     # stern brows
+	_rect(img, 51, 47, 8, 3, Color8(90, 60, 36))
+	_rect(img, 39, 51, 4, 2, INK)
+	_rect(img, 53, 51, 4, 2, INK)
+	_rect(img, 46, 52, 4, 8, skin.darkened(0.1))
+	_rect(img, 38, 63, 20, 3, Color8(110, 72, 42))                   # moustache
+	_rect(img, 44, 68, 8, 1, Color8(120, 70, 60))
+	_line(img, 58, 47, 61, 58, Color8(196, 120, 108))                # scar
+	# helmet with nasal guard and blue plume
+	_ellipse(img, 48, 18, 6, 11, ROYAL_LIGHT)
+	_ellipse(img, 48, 35, 22, 12, STEEL)
+	_ellipse(img, 42, 30, 7, 3, STEEL_LIGHT)
+	_rect(img, 26, 41, 44, 4, STEEL_DARK)
+	_rect(img, 46, 41, 4, 13, STEEL_DARK)
+	_outline(img)
+	return img
+
+
+func _portrait_messenger() -> Image:
+	var img := _img(96, 112)
+	var brown := Color8(124, 82, 46)
+	_bust(img, Color8(96, 152, 204), SKIN_LIGHT)
+	_line(img, 28, 84, 68, 112, LEATHER, 5)                          # bag strap
+	_ellipse(img, 48, 37, 21, 13, brown)                             # messy hair
+	for hx in [30, 38, 56, 64]:
+		_rect(img, hx, 28, 4, 8, brown)
+	_rect(img, 37, 49, 7, 6, Color8(250, 250, 250))                  # wide eyes
+	_rect(img, 52, 49, 7, 6, Color8(250, 250, 250))
+	_rect(img, 39, 51, 3, 3, INK)
+	_rect(img, 54, 51, 3, 3, INK)
+	_rect(img, 37, 44, 7, 2, brown)                                  # raised brows
+	_rect(img, 52, 44, 7, 2, brown)
+	_rect(img, 46, 55, 4, 6, SKIN_LIGHT.darkened(0.1))
+	_ellipse(img, 48, 67, 5, 4.5, Color8(130, 40, 40))               # shouting mouth
+	_ellipse(img, 36, 60, 4, 2, Color(0.95, 0.5, 0.5, 0.5))          # out of breath
+	_ellipse(img, 60, 60, 4, 2, Color(0.95, 0.5, 0.5, 0.5))
+	_ellipse(img, 70, 42, 2, 3.5, Color8(170, 214, 244))             # sweat
+	_ellipse(img, 25, 52, 2, 3.5, Color8(170, 214, 244))
 	_outline(img)
 	return img

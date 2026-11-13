@@ -169,8 +169,11 @@ All values in `scripts/data/shop_data.gd`.
    2. *"My king! They are back, more of them than before. Every outer wall has fallen."*
    3. *"Only the last wall still stands. ...Call the hero."*
 3. **Game.**
-4. **Win:** *"The walls are ours again. The kingdom is saved."* → Main Menu.
+4. **Win:** *"The walls are ours again. The kingdom is saved."* → Main Menu (or Play again).
 5. **Lose:** *"The last wall has fallen."* → Try Again / Main Menu.
+
+- Scenes: `main.tscn` (start menu, the main scene) → `story.tscn` → `game.tscn` → `end_screen.tscn`. Pause menu has Resume / Main Menu.
+- Story and end screens are in a bright throne room with pixel portraits (King, Commander, Messenger) and a parchment text box with a typewriter effect. All text is in `scripts/data/story_data.gd`. End screens show enemies defeated, coins earned, and times bounced back.
 
 ---
 

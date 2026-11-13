@@ -141,7 +141,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _set_paused(paused: bool) -> void:
 	get_tree().paused = paused
 	if paused:
-		_show_message("Paused", "Press Esc to continue", [["Resume", "resume", true]])
+		_show_message("Paused", "Press Esc to continue", [["Resume", "resume", true], ["Main Menu", "menu", false]])
 	else:
 		_dim.visible = false
 		_msg_panel.visible = false

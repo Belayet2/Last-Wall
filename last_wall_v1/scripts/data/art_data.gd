@@ -26,6 +26,11 @@ const SPRITES := {
 	"ruins": {"path": "res://assets/sprites/ruins.png", "size": Vector2(1280, 150)},
 	"edge_rocks": {"path": "res://assets/sprites/edge_rocks.png", "size": Vector2(40, 475)},
 	"marker": {"path": "res://assets/sprites/marker.png", "size": Vector2(56, 18)},
+	# story and end screens (drawn small, shown big)
+	"story_throne_room": {"path": "res://assets/sprites/story_throne_room.png", "size": Vector2(1280, 720)},
+	"portrait_king": {"path": "res://assets/sprites/portrait_king.png", "size": Vector2(288, 336)},
+	"portrait_commander": {"path": "res://assets/sprites/portrait_commander.png", "size": Vector2(288, 336)},
+	"portrait_messenger": {"path": "res://assets/sprites/portrait_messenger.png", "size": Vector2(288, 336)},
 	# HUD icons
 	"icon_wall": {"path": "res://assets/sprites/icon_wall.png", "size": Vector2(28, 28)},
 	"icon_coin": {"path": "res://assets/sprites/icon_coin.png", "size": Vector2(26, 26)},

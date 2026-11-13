@@ -15,6 +15,12 @@ var upgrade_levels: Dictionary = {}
 var wall_hp: Array[int] = []    # one entry per wall; FALLEN = held by the enemy
 var repair_hp := 0              # extra HP bought for the next wall we fight on
 
+# end-of-game info (shown on the win / lose screen)
+var last_result := ""           # "win" or "lose"
+var enemies_defeated := 0
+var falls := 0                  # how many times the hero fell back
+var coins_earned := 0
+
 
 func _ready() -> void:
 	reset()
@@ -24,6 +30,10 @@ func reset() -> void:
 	coins = ShopData.START_COINS
 	current_wall = 1
 	repair_hp = 0
+	last_result = ""
+	enemies_defeated = 0
+	falls = 0
+	coins_earned = 0
 	upgrade_levels.clear()
 	for key in ShopData.UPGRADES:
 		upgrade_levels[key] = 0
@@ -35,6 +45,8 @@ func reset() -> void:
 
 func add_coins(amount: int) -> void:
 	coins += amount
+	if amount > 0:
+		coins_earned += amount
 	coins_changed.emit(coins)
 
 
@@ -90,6 +102,7 @@ func advance() -> void:
 func fall_back() -> void:
 	wall_hp[current_wall - 1] = FALLEN
 	current_wall = maxi(current_wall - 1, 1)
+	falls += 1
 
 
 # ---------------------------------------------------------------- upgrades

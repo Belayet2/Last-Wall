@@ -33,7 +33,7 @@ func _ready() -> void:
 	var max_hp: int = level["max_hp"]
 	var start_hp := GameState.begin_wave()
 
-	_build_world()
+	build_world(self)
 
 	_fx = FxScript.new()
 	add_child(_fx)
@@ -68,22 +68,23 @@ func _ready() -> void:
 	_hud.show_intro(number, level["title"], level["tip"])
 
 
-func _build_world() -> void:
+## Background used by the game and the main menu.
+static func build_world(parent: Node) -> void:
 	var cx := GameData.SCREEN_WIDTH * 0.5
-	_add_bg("ruins", Vector2(cx, GameData.RUINS_TOP + GameData.RUINS_HEIGHT * 0.5), false, -10)
-	_add_bg("ground", Vector2(cx, GameData.GROUND_TOP + GameData.GROUND_HEIGHT * 0.5), false, -10)
-	_add_bg("path", Vector2(cx, GameData.PATH_TOP + GameData.PATH_HEIGHT * 0.5), false, -10)
+	_add_bg(parent, "ruins", Vector2(cx, GameData.RUINS_TOP + GameData.RUINS_HEIGHT * 0.5), false, -10)
+	_add_bg(parent, "ground", Vector2(cx, GameData.GROUND_TOP + GameData.GROUND_HEIGHT * 0.5), false, -10)
+	_add_bg(parent, "path", Vector2(cx, GameData.PATH_TOP + GameData.PATH_HEIGHT * 0.5), false, -10)
 	var rocks_y := GameData.GROUND_TOP + (GameData.GROUND_HEIGHT + GameData.PATH_HEIGHT) * 0.5
-	_add_bg("edge_rocks", Vector2(GameData.EDGE_ROCKS_X, rocks_y), false, -9)
-	_add_bg("edge_rocks", Vector2(GameData.SCREEN_WIDTH - GameData.EDGE_ROCKS_X, rocks_y), true, -9)
+	_add_bg(parent, "edge_rocks", Vector2(GameData.EDGE_ROCKS_X, rocks_y), false, -9)
+	_add_bg(parent, "edge_rocks", Vector2(GameData.SCREEN_WIDTH - GameData.EDGE_ROCKS_X, rocks_y), true, -9)
 
 
-func _add_bg(key: String, center: Vector2, flip: bool, z: int) -> void:
+static func _add_bg(parent: Node, key: String, center: Vector2, flip: bool, z: int) -> void:
 	var s := ArtData.make_sprite(key)
 	s.position = center
 	s.flip_h = flip
 	s.z_index = z
-	add_child(s)
+	parent.add_child(s)
 
 
 func _spawn_enemies(level: Dictionary) -> void:
@@ -109,6 +110,7 @@ func _enemy_icons(level: Dictionary) -> Array:
 func _on_enemy_died(enemy: Node) -> void:
 	var coins: int = enemy.data["coins"]
 	GameState.add_coins(coins)
+	GameState.enemies_defeated += 1
 	_fx.float_text((enemy as Node2D).global_position + Vector2(0, FxData.COIN_TEXT_OFFSET_Y), "+%d" % coins, FxData.COIN_COLOR)
 	_fx.hit_stop()
 	_alive -= 1
@@ -125,7 +127,7 @@ func _on_wave_cleared() -> void:
 	_wall.heal_full()
 	_fx.float_text(Vector2(GameData.FIELD_CENTER_X, GameData.WALL_TOP - 10), "Retake bonus +%d" % bonus, FxData.COIN_COLOR)
 	if GameState.is_last_wall():
-		_end("Victory!", "Every wall is ours again. The kingdom is saved.", [["Play again", "restart", true]])
+		_finish("win", "Victory!", "Every wall is ours again.")
 		return
 	GameState.advance()
 	var next := GameState.current_wall
@@ -140,7 +142,7 @@ func _on_wall_fallen() -> void:
 		return
 	var lost := GameState.current_wall
 	if lost == 1:
-		_end("The Last Wall Fell", "The last wall has fallen.", [["Try again", "restart", true]])
+		_finish("lose", "The Last Wall Fell", "There is no wall left to fall back to.")
 		return
 	GameState.fall_back()
 	var back := GameState.current_wall
@@ -161,8 +163,23 @@ func _end(title: String, subtitle: String, buttons: Array) -> void:
 	get_tree().paused = true
 
 
+## Final result: show the title for a moment, then go to the win / lose screen.
+func _finish(result: String, title: String, subtitle: String) -> void:
+	GameState.last_result = result
+	_end(title, subtitle, [])
+	await get_tree().create_timer(GameData.FINISH_DELAY, true, false, true).timeout
+	Engine.time_scale = 1.0
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/end_screen.tscn")
+
+
 func _on_action(action: String) -> void:
 	match action:
+		"menu":
+			GameState.reset()
+			Engine.time_scale = 1.0
+			get_tree().paused = false
+			get_tree().change_scene_to_file("res://scenes/main.tscn")
 		"restart":
 			GameState.reset()
 			_reload()

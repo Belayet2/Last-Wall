@@ -54,3 +54,4 @@ const WALL_CRACKED_BELOW := 0.6      # under 60% HP the wall looks cracked
 const INTRO_HOLD := 1.8              # seconds the "WALL 1" title stays
 const INTRO_FADE := 0.6
 const END_PAUSE_DELAY := 0.5         # seconds before the game freezes after win/lose
+const FINISH_DELAY := 1.8            # seconds the "Victory!" / "Last Wall Fell" title shows before the end screen

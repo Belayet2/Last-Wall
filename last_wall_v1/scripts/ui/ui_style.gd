@@ -21,9 +21,10 @@ const PIP_ON := Color8(236, 170, 40)
 const PIP_OFF := Color8(214, 202, 180)
 
 
-static func panel(h_margin: float = 14.0, v_margin: float = 8.0) -> PanelContainer:
+## opaque = no see-through (for big panels over busy backgrounds).
+static func panel(h_margin: float = 14.0, v_margin: float = 8.0, opaque: bool = false) -> PanelContainer:
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = PAPER
+	sb.bg_color = Color(PAPER, 1.0) if opaque else PAPER
 	sb.border_color = BORDER
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(10)
