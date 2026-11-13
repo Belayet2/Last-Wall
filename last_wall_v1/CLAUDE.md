@@ -196,6 +196,8 @@ All values in `scripts/data/shop_data.gd`.
 5. **Menus:** start menu, story with Skip, win/lose screens.
 6. **Sound + music**, `assets/README.md` replace guide.
 7. **Balance + web export** (Thread Support OFF, `build/web/index.html`, test with `python -m http.server`).
+   - Done: presets "Web" and "Windows" in `export_presets.cfg`. Export: `godot --headless --path . --export-release "Web" build/web/index.html` (and `"Windows" build/windows/LastWall.exe`). itch.io zip: `build/last_wall_web.zip` (index.html at the zip root). `build/` is not in git.
+   - Balance (bot tests): a decent player wins in ~3 min with no fall-backs; a casual player wins in ~5-7 min and sometimes falls back once on Wall 3. Numbers left as they are.
 
 ---
 
