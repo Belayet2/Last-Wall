@@ -12,6 +12,7 @@ var _shake := 0.0
 func _ready() -> void:
 	add_to_group("fx")
 	z_index = 5
+	process_mode = Node.PROCESS_MODE_ALWAYS   # bursts and floating text finish even behind popups
 	_camera = Camera2D.new()
 	_camera.position = Vector2(GameData.SCREEN_WIDTH * 0.5, 360)
 	add_child(_camera)
@@ -95,11 +96,11 @@ func float_text(pos: Vector2, text: String, color: Color) -> void:
 	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.07))
 	label.add_theme_constant_override("outline_size", 6)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.size = Vector2(80, 30)
-	label.position = Vector2(-40, -15)
 	holder.add_child(label)
 	add_child(holder)
+	var text_size := label.get_minimum_size()
+	label.size = text_size
+	label.position = -text_size * 0.5
 	var t := holder.create_tween().set_parallel(true)
 	t.tween_property(holder, "position:y", pos.y - FxData.FLOAT_TEXT_RISE, FxData.FLOAT_TEXT_TIME).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	t.tween_property(holder, "modulate:a", 0.0, FxData.FLOAT_TEXT_TIME * 0.5).set_delay(FxData.FLOAT_TEXT_TIME * 0.5)

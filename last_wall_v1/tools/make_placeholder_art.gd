@@ -15,17 +15,17 @@ const MAIL := Color8(124, 128, 140)
 const LEATHER := Color8(92, 60, 36)
 const WOOD := Color8(140, 90, 48)
 const WOOD_DARK := Color8(96, 60, 32)
-const WALL_STONE := Color8(156, 146, 128)
-const MORTAR := Color8(104, 96, 84)
+const WALL_STONE := Color8(206, 196, 174)
+const MORTAR := Color8(158, 148, 130)
 const ROYAL := Color8(46, 88, 180)
 const ROYAL_DARK := Color8(30, 58, 128)
 const ROYAL_LIGHT := Color8(84, 126, 214)
 const GOLD := Color8(230, 188, 76)
 const ENEMY_RED := Color8(150, 40, 40)
 const ENEMY_SKIN := Color8(196, 150, 110)
-const ROCK := Color8(124, 118, 112)
-const SKY_TOP := Color8(56, 64, 96)
-const SKY_LOW := Color8(176, 124, 104)
+const ROCK := Color8(170, 162, 152)
+const SKY_TOP := Color8(108, 174, 236)
+const SKY_LOW := Color8(206, 232, 248)
 
 var rng := RandomNumberGenerator.new()
 var force := false
@@ -422,7 +422,7 @@ func _wall(damage: int) -> Image:
 		_line(img, dcx - 26, 92, dcx - 6, 60, WOOD_DARK, 4)
 		_line(img, dcx + 22, 94, dcx + 10, 72, WOOD, 3)
 
-	var crack := Color8(54, 48, 44)
+	var crack := Color8(112, 102, 92)
 	if damage >= 1:
 		var crack_count := 12 if damage == 1 else 24
 		for i in range(crack_count):
@@ -441,7 +441,7 @@ func _wall(damage: int) -> Image:
 			var bx := rng.randi_range(0, w - 40)
 			if absi(bx - dcx) < 60:
 				continue
-			_rect(img, bx, rng.randi_range(22, 80), rng.randi_range(14, 34), rng.randi_range(6, 12), Color8(88, 80, 70))
+			_rect(img, bx, rng.randi_range(22, 80), rng.randi_range(14, 34), rng.randi_range(6, 12), Color8(160, 150, 132))
 	if damage >= 2:
 		var top := 22.0
 		for x in range(w):
@@ -463,18 +463,18 @@ func _ground() -> Image:
 	var img := _img(w, h)
 	for y in range(h):
 		var t := float(y) / h
-		_rect(img, 0, y, w, 1, Color8(88, 100, 58).lerp(Color8(114, 128, 68), t))
+		_rect(img, 0, y, w, 1, Color8(124, 176, 82).lerp(Color8(146, 198, 96), t))
 	_speckle(img, Rect2i(0, 0, w, h), 26000, 0.06)
 	for i in range(280):
 		var x := rng.randi_range(2, w - 3)
 		var y := rng.randi_range(4, h - 2)
-		var c := Color8(70, 88, 44)
+		var c := Color8(92, 142, 60)
 		_rect(img, x, y - 3, 1, 3, c)
 		_rect(img, x + 2, y - 4, 1, 4, c)
 	for i in range(70):
-		_ellipse(img, rng.randf_range(0, w), rng.randf_range(0, h), rng.randf_range(10, 30), rng.randf_range(4, 9), Color8(122, 110, 76, 110))
+		_ellipse(img, rng.randf_range(0, w), rng.randf_range(0, h), rng.randf_range(10, 30), rng.randf_range(4, 9), Color8(180, 164, 112, 110))
 	for i in range(90):
-		_circle(img, rng.randf_range(0, w), rng.randf_range(0, h), rng.randf_range(1.5, 3), Color8(140, 134, 120))
+		_circle(img, rng.randf_range(0, w), rng.randf_range(0, h), rng.randf_range(1.5, 3), Color8(184, 178, 164))
 	return img
 
 
@@ -482,12 +482,12 @@ func _path() -> Image:
 	var w := 1280
 	var h := 76
 	var img := _img(w, h)
-	_rect(img, 0, 0, w, h, Color8(156, 126, 86))
-	_rect(img, 0, 0, w, 4, Color8(118, 94, 62))
-	_rect(img, 0, h - 3, w, 3, Color8(118, 94, 62))
+	_rect(img, 0, 0, w, h, Color8(216, 190, 142))
+	_rect(img, 0, 0, w, 4, Color8(178, 150, 106))
+	_rect(img, 0, h - 3, w, 3, Color8(178, 150, 106))
 	_speckle(img, Rect2i(0, 0, w, h), 10000, 0.05)
 	for i in range(200):
-		_circle(img, rng.randf_range(0, w), rng.randf_range(6, h - 6), rng.randf_range(1, 2.5), Color8(124, 112, 96))
+		_circle(img, rng.randf_range(0, w), rng.randf_range(6, h - 6), rng.randf_range(1, 2.5), Color8(186, 172, 150))
 	return img
 
 
@@ -498,11 +498,13 @@ func _ruins() -> Image:
 	var img := _img(w, h)
 	for y in range(h):
 		_rect(img, 0, y, w, 1, _sky_color(y))
-	for sx in [250.0, 1030.0]:
-		for k in range(9):
-			_circle(img, sx + k * 5 + rng.randf_range(-4, 4), 78 - k * 8, 7 + k * 1.6, Color(0.42, 0.38, 0.40, 0.16))
-	var enemy_stone := Color8(92, 86, 94)
-	_bricks(img, Rect2i(0, 56, w, 94), enemy_stone, Color8(62, 58, 66), 34, 12, 0.05)
+	# soft white clouds
+	for cx in [180.0, 520.0, 860.0, 1150.0]:
+		var cy := rng.randf_range(18, 40)
+		for k in range(6):
+			_ellipse(img, cx + k * 14 - 35 + rng.randf_range(-5, 5), cy + rng.randf_range(-4, 4), rng.randf_range(14, 22), rng.randf_range(7, 11), Color(1, 1, 1, 0.55))
+	var enemy_stone := Color8(162, 156, 162)
+	_bricks(img, Rect2i(0, 56, w, 94), enemy_stone, Color8(124, 118, 126), 34, 12, 0.05)
 	# broken top edge (higher at the corners: stumps of old towers)
 	var top := 70.0
 	for x in range(w):
@@ -511,19 +513,19 @@ func _ruins() -> Image:
 		var cut := int(lerpf(top, 58.0, corner))
 		for y in range(56, cut):
 			img.set_pixel(x, y, _sky_color(y))
-		img.set_pixel(x, cut, Color8(40, 36, 42))
+		img.set_pixel(x, cut, Color8(104, 98, 106))
 	# a few dark gaps in the broken wall (soft, not pure black)
 	for i in range(9):
 		var hx := rng.randf_range(40, w - 40)
 		var hy := rng.randf_range(102, 124)
 		var hr := rng.randf_range(7, 14)
-		_ellipse(img, hx, hy, hr + 2, hr * 0.6 + 2, Color8(70, 64, 74))
-		_ellipse(img, hx, hy + 1, hr, hr * 0.6, Color8(52, 47, 56))
+		_ellipse(img, hx, hy, hr + 2, hr * 0.6 + 2, Color8(134, 128, 136))
+		_ellipse(img, hx, hy + 1, hr, hr * 0.6, Color8(112, 106, 116))
 	for bx in [390, 890]:
 		_rect(img, bx, 30, 2, 50, Color8(60, 44, 34))
 		_rect(img, bx + 2, 32, 20, 24, Color8(150, 30, 30))
 		_clear(img, bx + 13, 50, 9, 6)
-	_rect(img, 0, 136, w, 14, Color8(76, 70, 70))
+	_rect(img, 0, 136, w, 14, Color8(150, 142, 136))
 	for i in range(140):
 		_circle(img, rng.randf_range(0, w), rng.randf_range(132, 148), rng.randf_range(2, 6), enemy_stone.darkened(rng.randf_range(0, 0.3)))
 	_speckle(img, Rect2i(0, 56, w, 94), 5000, 0.05)

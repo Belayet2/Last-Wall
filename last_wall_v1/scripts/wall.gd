@@ -70,6 +70,15 @@ func take_damage(amount: int, hit_pos: Vector2) -> void:
 		wall_fallen.emit()
 
 
+## Retaken: back to full HP.
+func heal_full() -> void:
+	hp = max_hp
+	hp_changed.emit(hp, max_hp)
+	_update_look()
+	_sprite.modulate = Color(1.3, 1.25, 1.0)
+	create_tween().tween_property(_sprite, "modulate", Color.WHITE, 0.4)
+
+
 ## Picks whole / cracked / broken. Returns true if the look changed.
 func _update_look() -> bool:
 	var ratio := float(hp) / float(max_hp)

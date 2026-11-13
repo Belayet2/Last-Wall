@@ -50,7 +50,8 @@ The world fills the **whole screen** (no side panels). Top to bottom:
 - Rocky edges on the left and right of the field are solid: stones bounce off them.
 - The background is **land, not sea**: the enemies stand on the rubble of the outer wall they captured.
 - **Camera:** we look over the hero's shoulder toward the enemies. The hero is seen **from behind**; enemies face us. Things near the bottom (hero) are bigger than things at the top (enemies).
-- **HUD:** only small dark panels with a gold border along the top edge (over the sky): wall number, name and HP bar (left), one helmet icon per enemy that grays out when it falls (middle), coins (right). Wave intro title in the middle of the field at the start; pause/end messages in a centered panel with a button.
+- **Bright and light theme** (user request): daytime blue sky with clouds, bright green field, sandy path, light stone. UI uses light parchment panels with a warm brown border and dark brown text (colors in `scripts/ui/ui_style.gd`). Avoid dark/dusk looks.
+- **HUD:** only small parchment panels along the top edge (over the sky): wall number, name and HP bar (left), one helmet icon per enemy that grays out when it falls (middle), coins (right). Wave intro title in the middle of the field at the start; pause/end messages in a centered panel with a button.
 
 ---
 
