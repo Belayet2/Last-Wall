@@ -6,6 +6,7 @@ extends Area2D
 
 const GameData = preload("res://scripts/data/game_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
+const FxData = preload("res://scripts/data/fx_data.gd")
 
 var catch_width := 140.0
 
@@ -14,6 +15,7 @@ var _shape: CollisionShape2D
 var _aura: Line2D
 var _glow: Line2D
 var _flash: Tween
+var _nudge: Tween
 
 
 func _ready() -> void:
@@ -80,6 +82,14 @@ func bounce_stone(stone) -> void:
 	stone.global_position.y = minf(stone_pos.y, surface_y - float(stone.diameter) * 0.5)
 	stone.make_returned(dir * speed)
 	_flash_aura()
+	var fx := get_tree().get_first_node_in_group("fx")
+	if fx:
+		fx.burst(Vector2(stone_pos.x, surface_y), FxData.SPARKS, dir)
+	if _nudge:
+		_nudge.kill()
+	_sprite.position.y = FxData.SHIELD_NUDGE
+	_nudge = create_tween()
+	_nudge.tween_property(_sprite, "position:y", 0.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _nearest_enemy(from: Vector2) -> Node2D:

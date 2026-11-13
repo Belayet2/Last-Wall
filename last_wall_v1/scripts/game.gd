@@ -8,8 +8,11 @@ const WallScript = preload("res://scripts/wall.gd")
 const HeroScript = preload("res://scripts/hero.gd")
 const EnemyScript = preload("res://scripts/enemy.gd")
 const HudScript = preload("res://scripts/hud.gd")
+const FxScript = preload("res://scripts/fx.gd")
+const FxData = preload("res://scripts/data/fx_data.gd")
 
 var _wall: WallScript
+var _fx: FxScript
 var _hud: HudScript
 var _stones: Node2D
 var _markers: Node2D
@@ -23,6 +26,9 @@ func _ready() -> void:
 	var wall_hp: int = level["max_hp"]
 
 	_build_world()
+
+	_fx = FxScript.new()
+	add_child(_fx)
 
 	_markers = Node2D.new()
 	_markers.name = "Markers"
@@ -88,12 +94,14 @@ func _spawn_enemies(level: Dictionary) -> void:
 func _on_enemy_died(enemy: Node) -> void:
 	var coins: int = enemy.data["coins"]
 	GameState.add_coins(coins)
+	_fx.float_text((enemy as Node2D).global_position + Vector2(0, FxData.COIN_TEXT_OFFSET_Y), "+%d" % coins, FxData.COIN_COLOR)
+	_fx.hit_stop()
 	_alive -= 1
 	_hud.mark_enemy_down(enemy.index)
 	if _alive <= 0 and not _ended:
 		_end("Wall Held!", "Every thrower is down. The wall stands.", "Play again")
 		for stone in get_tree().get_nodes_in_group("stones"):
-			stone.remove()
+			stone.shatter()
 
 
 func _on_wall_hp_changed(hp: int, max_hp: int) -> void:
@@ -113,6 +121,7 @@ func _end(title: String, subtitle: String, button_text: String) -> void:
 
 
 func _restart() -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	GameState.reset()
 	get_tree().reload_current_scene()

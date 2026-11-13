@@ -176,7 +176,7 @@ All values in `scripts/data/shop_data.gd`.
 - Files (all in `assets/sprites/`): `hero, shield, shadow, stone, stone_returned, enemy_thrower(+_windup), enemy_slinger(+_windup), enemy_catapult(+_windup), wall_whole, wall_cracked, wall_broken, ground, path, ruins, edge_rocks, marker, icon_wall, icon_coin, icon_enemy` (`.png`). The list with sizes lives in `scripts/data/art_data.gd`.
 - Placeholders are drawn by `tools/make_placeholder_art.gd` (it never overwrites existing files unless run with `--force` or `--only=name`).
 - `assets/README.md` explains in plain steps how to replace each file and lists its target size. List sources/licenses in `assets/CREDITS.txt`.
-- **Effects (important):** shield flash + spark particles on bounce, dust puff when a stone breaks, screen shake on wall hit, enemy knock-back + pop on death, floating "+coins" text, short hit-stop on a kill, wall crack tween. Sounds later (`.ogg`, made with jsfxr), music after the Play click.
+- **Effects (important, all numbers in `scripts/data/fx_data.gd`, code in `scripts/fx.gd`):** shield flash + spark particles on bounce, gold trail on returned stones, pulsing landing markers, "-damage" text on the wall, dust puff when a stone breaks, screen shake on wall hit, enemy knock-back + pop on death, floating "+coins" text, short hit-stop on a kill, wall crack tween. Sounds later (`.ogg`, made with jsfxr), music after the Play click.
 
 ---
 

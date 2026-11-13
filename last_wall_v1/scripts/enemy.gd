@@ -9,6 +9,7 @@ const GameData = preload("res://scripts/data/game_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
 const EnemyData = preload("res://scripts/data/enemy_data.gd")
 const StoneScript = preload("res://scripts/stone.gd")
+const FxData = preload("res://scripts/data/fx_data.gd")
 
 var type_key := "thrower"
 var index := 0
@@ -27,6 +28,8 @@ var _target := Vector2.ZERO
 var _marker: Node2D = null
 var _windup: Tween
 var _flash: Tween
+var _knock: Tween
+var _home := Vector2.ZERO
 
 
 func setup(key: String, enemy_index: int, stone_cap: int, stones_parent: Node, markers_parent: Node) -> void:
@@ -55,6 +58,7 @@ func _ready() -> void:
 	add_child(shadow)
 	_sprite = ArtData.make_sprite(data["sprite"], _body_size)
 	add_child(_sprite)
+	_home = position
 	_timer = randf_range(EnemyData.FIRST_THROW_DELAY_MIN, data["throw_interval"])
 
 
@@ -88,6 +92,10 @@ func _start_windup() -> void:
 	_markers_parent.add_child(_marker)
 	var marker_tween := _marker.create_tween()
 	marker_tween.tween_property(_marker, "modulate:a", 1.0, EnemyData.WINDUP_TIME * 0.5)
+	var base_scale := _marker.scale
+	var pulse := _marker.create_tween().set_loops()
+	pulse.tween_property(_marker, "scale", base_scale * FxData.MARKER_PULSE, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
+	pulse.tween_property(_marker, "scale", base_scale, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
 
 	ArtData.apply(_sprite, data["windup_sprite"], _body_size)
 	_windup = create_tween()
@@ -128,6 +136,11 @@ func take_damage(amount: int) -> void:
 	_sprite.self_modulate = Color(3, 3, 3)
 	_flash = create_tween()
 	_flash.tween_property(_sprite, "self_modulate", Color.WHITE, 0.15)
+	if _knock:
+		_knock.kill()
+	position = _home + Vector2(0, -FxData.KNOCKBACK)
+	_knock = create_tween()
+	_knock.tween_property(self, "position", _home, FxData.KNOCKBACK_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if hp <= 0:
 		_die()
 
@@ -142,6 +155,11 @@ func _die() -> void:
 		_marker.queue_free()
 	_marker = null
 	set_deferred("monitorable", false)
+	var fx := get_tree().get_first_node_in_group("fx")
+	if fx:
+		fx.burst(global_position, FxData.ENEMY_BURST)
+		fx.burst(global_position, FxData.DUST)
+		fx.shake(FxData.SHAKE_ENEMY_DOWN)
 	died.emit(self)
 	var pop := create_tween()
 	pop.set_parallel(true)

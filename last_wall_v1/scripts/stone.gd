@@ -3,6 +3,8 @@ extends Area2D
 
 const GameData = preload("res://scripts/data/game_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
+const FxData = preload("res://scripts/data/fx_data.gd")
+const FxScript = preload("res://scripts/fx.gd")
 
 const LAYER_SHIELD := 1
 const LAYER_HOSTILE := 2
@@ -20,6 +22,7 @@ var marker: Node2D = null   # landing marker, removed when the stone is bounced 
 var _life := 0.0
 var _gone := false
 var _sprite: Sprite2D
+var _fx: Node
 
 
 func setup(start: Vector2, start_velocity: Vector2, stone_diameter: float, damage_to_wall: int, damage_to_enemy: int) -> void:
@@ -44,6 +47,7 @@ func _ready() -> void:
 	_sprite = ArtData.make_sprite("stone", Vector2(diameter, diameter))
 	add_child(_sprite)
 	area_entered.connect(_on_area_entered)
+	_fx = get_tree().get_first_node_in_group("fx")
 
 
 func _physics_process(delta: float) -> void:
@@ -53,9 +57,11 @@ func _physics_process(delta: float) -> void:
 	if position.x < GameData.FIELD_LEFT + r:
 		position.x = GameData.FIELD_LEFT + r
 		velocity.x = absf(velocity.x)
+		_puff(Vector2(GameData.FIELD_LEFT, position.y), FxData.SMALL_DUST)
 	elif position.x > GameData.FIELD_RIGHT - r:
 		position.x = GameData.FIELD_RIGHT - r
 		velocity.x = -absf(velocity.x)
+		_puff(Vector2(GameData.FIELD_RIGHT, position.y), FxData.SMALL_DUST)
 	_life += delta
 	if _life > GameData.STONE_LIFETIME or position.y < -40.0 or position.y > 760.0:
 		remove()
@@ -67,11 +73,13 @@ func _on_area_entered(area) -> void:
 	if returned:
 		if area.is_in_group("enemies"):
 			area.take_damage(return_damage + int(GameState.get_value("stone_power")))
+			_puff(global_position, FxData.GOLD_CHIPS)
 			remove()
 	elif area.is_in_group("shield"):
 		area.bounce_stone(self)
 	elif area.is_in_group("wall"):
-		area.take_damage(wall_damage)
+		area.take_damage(wall_damage, global_position)
+		_puff(global_position, FxData.DUST)
 		remove()
 
 
@@ -84,6 +92,8 @@ func make_returned(new_velocity: Vector2) -> void:
 	set_deferred("collision_layer", LAYER_RETURNED)
 	set_deferred("collision_mask", LAYER_ENEMY)
 	ArtData.apply(_sprite, "stone_returned", Vector2(diameter, diameter) * 1.25)
+	if FxData.TRAIL["amount"] > 0:
+		add_child(FxScript.make_trail(FxData.TRAIL))
 
 
 func remove() -> void:
@@ -92,6 +102,17 @@ func remove() -> void:
 	_gone = true
 	_clear_marker()
 	queue_free()
+
+
+## Breaks the stone into dust (used when a wave ends).
+func shatter() -> void:
+	_puff(global_position, FxData.DUST)
+	remove()
+
+
+func _puff(pos: Vector2, preset: Dictionary) -> void:
+	if is_instance_valid(_fx):
+		_fx.burst(pos, preset)
 
 
 func _clear_marker() -> void:

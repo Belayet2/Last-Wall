@@ -1,0 +1,68 @@
+## Effect ("juice") numbers. Tune freely. Set an amount to 0 to turn an effect off.
+
+# --- Screen shake (pixels; it fades out at SHAKE_DECAY pixels per second) ---
+const SHAKE_DECAY := 30.0
+const SHAKE_WALL_HIT := 5.0
+const SHAKE_WALL_CRACK := 12.0      # when the wall changes look (cracked / broken)
+const SHAKE_ENEMY_DOWN := 4.0
+
+# --- Hit-stop: the game almost freezes for a moment when an enemy falls ---
+const HIT_STOP_TIME := 0.06         # real seconds
+const HIT_STOP_SCALE := 0.05        # game speed during the hit-stop
+
+# --- Floating text ("+5" coins, "-8" wall damage) ---
+const FLOAT_TEXT_RISE := 42.0
+const FLOAT_TEXT_TIME := 0.8
+const FLOAT_TEXT_SIZE := 22
+const COIN_COLOR := Color(1.0, 0.84, 0.3)
+const DAMAGE_COLOR := Color(1.0, 0.38, 0.32)
+const COIN_TEXT_OFFSET_Y := 10.0    # coin text starts a bit below the enemy (stays under the HUD)
+const WALL_HIT_FLASH := Color(1.3, 0.85, 0.8)
+
+# --- Small motions ---
+const KNOCKBACK := 10.0             # enemy is pushed back (up) this far when hit
+const KNOCKBACK_TIME := 0.2
+const SHIELD_NUDGE := 3.0           # shield dips this far when a stone hits it
+const WALL_JIGGLE := 3.0            # wall shakes sideways this far when hit
+const MARKER_PULSE := 1.15          # landing markers pulse to this size
+const MARKER_PULSE_TIME := 0.35
+const COIN_PUNCH := 1.35            # HUD coin number pops to this size
+
+# --- Particle bursts (little pixel squares) ---
+## Keys: amount, lifetime, direction, spread (deg), speed_min/max, gravity, damping,
+## size_min/max (px), color. Optional: rect (emit from a box of this half-size).
+const SPARKS := {
+	"amount": 16, "lifetime": 0.4, "direction": Vector2(0, -1), "spread": 70.0,
+	"speed_min": 120.0, "speed_max": 260.0, "gravity": Vector2(0, 520), "damping": 0.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(1.0, 0.86, 0.4),
+}
+const DUST := {
+	"amount": 12, "lifetime": 0.5, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 30.0, "speed_max": 90.0, "gravity": Vector2(0, 0), "damping": 100.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(0.78, 0.72, 0.64),
+}
+const SMALL_DUST := {
+	"amount": 5, "lifetime": 0.35, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 20.0, "speed_max": 60.0, "gravity": Vector2(0, 0), "damping": 90.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(0.7, 0.66, 0.6),
+}
+const GOLD_CHIPS := {
+	"amount": 10, "lifetime": 0.45, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 80.0, "speed_max": 180.0, "gravity": Vector2(0, 420), "damping": 0.0,
+	"size_min": 2.0, "size_max": 3.0, "color": Color(1.0, 0.82, 0.35),
+}
+const ENEMY_BURST := {
+	"amount": 22, "lifetime": 0.6, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 60.0, "speed_max": 170.0, "gravity": Vector2(0, 380), "damping": 20.0,
+	"size_min": 2.0, "size_max": 5.0, "color": Color(0.72, 0.2, 0.2),
+}
+const WALL_RUBBLE := {
+	"amount": 40, "lifetime": 0.7, "direction": Vector2(0, -1), "spread": 50.0,
+	"speed_min": 60.0, "speed_max": 160.0, "gravity": Vector2(0, 400), "damping": 10.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(0.62, 0.58, 0.52),
+	"rect": Vector2(600, 4),
+}
+## Trail behind a returned (gold) stone.
+const TRAIL := {
+	"amount": 18, "lifetime": 0.3, "size_min": 2.0, "size_max": 4.0, "color": Color(1.0, 0.82, 0.3),
+}

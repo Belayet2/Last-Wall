@@ -9,6 +9,7 @@ signal restart_requested
 
 const ArtData = preload("res://scripts/data/art_data.gd")
 const GameData = preload("res://scripts/data/game_data.gd")
+const FxData = preload("res://scripts/data/fx_data.gd")
 
 const TEXT := Color8(244, 236, 220)
 const TEXT_DIM := Color8(206, 196, 176)
@@ -23,6 +24,7 @@ const MARGIN := 16.0
 
 var ended := false
 
+var _coins := 0
 var _wall_number: Label
 var _wall_title: Label
 var _hp_bar: ProgressBar
@@ -72,7 +74,13 @@ func set_wall_hp(hp: int, max_hp: int) -> void:
 
 
 func set_coins(coins: int) -> void:
+	var gained := coins > _coins
+	_coins = coins
 	_coins_label.text = str(coins)
+	if gained:
+		_coins_label.pivot_offset = _coins_label.size * 0.5
+		_coins_label.scale = Vector2.ONE * FxData.COIN_PUNCH
+		create_tween().tween_property(_coins_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func set_enemy_count(count: int) -> void:
