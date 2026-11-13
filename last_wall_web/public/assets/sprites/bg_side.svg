@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="720" viewBox="0 0 360 720">
+  <!-- Left side panel. The right panel uses the same image, mirrored. -->
+  <defs>
+    <pattern id="stone" width="72" height="48" patternUnits="userSpaceOnUse">
+      <rect width="72" height="48" fill="#d8caa9"/>
+      <path d="M0 1 H72 M0 25 H72 M1 1 V25 M37 25 V48" stroke="#c2b28c" stroke-width="2" fill="none"/>
+    </pattern>
+  </defs>
+  <rect width="360" height="720" fill="url(#stone)"/>
+
+  <!-- parchment card -->
+  <rect x="18" y="18" width="310" height="684" rx="12" fill="#b49a6a" opacity="0.35" transform="translate(3 4)"/>
+  <rect x="18" y="18" width="310" height="684" rx="12" fill="#f5edd8" stroke="#b49a6a" stroke-width="3"/>
+  <rect x="26" y="26" width="294" height="668" rx="8" fill="none" stroke="#e2d4b2" stroke-width="2"/>
+
+  <!-- stone column facing the play field -->
+  <rect x="340" y="0" width="20" height="720" fill="#8c7b62"/>
+  <rect x="340" y="0" width="4" height="720" fill="#a8977c"/>
+  <rect x="356" y="0" width="4" height="720" fill="#5c4f3e"/>
+  <g stroke="#6f614c" stroke-width="2">
+    <path d="M344 60 H356 M344 150 H356 M344 240 H356 M344 330 H356 M344 420 H356 M344 510 H356 M344 600 H356 M344 690 H356"/>
+  </g>
+</svg>

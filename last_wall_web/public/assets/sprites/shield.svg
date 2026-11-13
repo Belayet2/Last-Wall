@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="24" viewBox="0 0 120 24">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6c9fdc"/>
+      <stop offset="1" stop-color="#284b7a"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="2" width="118" height="20" rx="10" fill="#a7781f"/>
+  <rect x="2.5" y="3" width="115" height="17" rx="8.5" fill="#d9a43a"/>
+  <rect x="5" y="5" width="110" height="13" rx="6.5" fill="url(#steel)"/>
+  <rect x="12" y="6.5" width="96" height="2.5" rx="1.25" fill="#ffffff" opacity="0.4"/>
+  <!-- edge marks hint that edge hits angle the shot -->
+  <path d="M14 8 L10 12 L14 16" stroke="#e9c35a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M106 8 L110 12 L106 16" stroke="#e9c35a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="60" cy="12" r="6" fill="#e9c35a" stroke="#8a6420" stroke-width="1.5"/>
+  <circle cx="60" cy="12" r="2.2" fill="#8a6420"/>
+  <g fill="#e9c35a">
+    <circle cx="30" cy="12" r="1.7"/>
+    <circle cx="44" cy="12" r="1.7"/>
+    <circle cx="76" cy="12" r="1.7"/>
+    <circle cx="90" cy="12" r="1.7"/>
+  </g>
+</svg>

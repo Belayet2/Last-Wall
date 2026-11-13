@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="720" viewBox="0 0 560 720">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b6fa8"/>
+      <stop offset="0.6" stop-color="#3f93c4"/>
+      <stop offset="1" stop-color="#63bfd8"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efdfae"/>
+      <stop offset="1" stop-color="#dcc28a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sea -->
+  <rect width="560" height="720" fill="url(#sea)"/>
+  <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M30 34 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M190 22 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M400 40 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M110 150 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M300 170 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M470 150 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M40 230 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M220 250 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M410 270 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M120 320 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M330 340 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M500 330 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M20 380 q8 -6 16 0 q8 6 16 0"/>
+    <path d="M250 390 q8 -6 16 0 q8 6 16 0"/>
+  </g>
+  <g fill="#ffffff" opacity="0.18">
+    <ellipse cx="150" cy="90" rx="22" ry="3"/>
+    <ellipse cx="360" cy="110" rx="18" ry="3"/>
+    <ellipse cx="520" cy="210" rx="14" ry="2.5"/>
+    <ellipse cx="80" cy="290" rx="16" ry="2.5"/>
+  </g>
+
+  <!-- shore: foam, wet sand, dry sand -->
+  <path d="M0 408 C 70 392, 140 428, 230 414 S 400 392, 470 410 S 540 420, 560 406 L560 720 L0 720 Z" fill="#f5f3e6"/>
+  <path d="M0 418 C 70 402, 140 438, 230 424 S 400 402, 470 420 S 540 430, 560 416 L560 720 L0 720 Z" fill="#cdb98a"/>
+  <path d="M0 430 C 70 416, 140 448, 230 436 S 400 414, 470 432 S 540 440, 560 428 L560 720 L0 720 Z" fill="url(#sand)"/>
+
+  <!-- pebbles and grass -->
+  <g fill="#b9a172">
+    <ellipse cx="60" cy="480" rx="5" ry="3"/>
+    <ellipse cx="190" cy="510" rx="4" ry="2.5"/>
+    <ellipse cx="350" cy="470" rx="6" ry="3"/>
+    <ellipse cx="470" cy="540" rx="4" ry="2.5"/>
+    <ellipse cx="120" cy="580" rx="5" ry="3"/>
+    <ellipse cx="420" cy="600" rx="5" ry="3"/>
+    <ellipse cx="280" cy="560" rx="3" ry="2"/>
+  </g>
+  <g stroke="#8faa55" stroke-width="2.5" stroke-linecap="round" fill="none">
+    <path d="M30 640 l-4 -12 M34 640 l0 -14 M38 640 l4 -11"/>
+    <path d="M250 642 l-4 -10 M254 642 l0 -13 M258 642 l4 -10"/>
+    <path d="M520 638 l-4 -12 M524 638 l0 -14 M528 638 l4 -11"/>
+  </g>
+</svg>

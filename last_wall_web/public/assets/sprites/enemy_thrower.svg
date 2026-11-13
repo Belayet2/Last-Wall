@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="84" height="76" viewBox="0 0 84 76">
+  <!-- Enemy Thrower: a small boat with a soldier holding a rock. -->
+  <ellipse cx="42" cy="68" rx="38" ry="6" fill="#ffffff" opacity="0.4"/>
+  <!-- mast + sail -->
+  <rect x="58" y="6" width="3" height="46" fill="#3e2614"/>
+  <path d="M61 9 Q80 22 61 38 Z" fill="#4a2a5e" stroke="#2a1638" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M61 5 L73 8 L61 12 Z" fill="#c0392b"/>
+  <!-- soldier -->
+  <rect x="22" y="31" width="16" height="20" rx="5" fill="#4a2a5e" stroke="#2a1638" stroke-width="1.5"/>
+  <line x1="36" y1="35" x2="45" y2="19" stroke="#d9a77a" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="46" cy="16" r="5.5" fill="#7d7468" stroke="#4a443c" stroke-width="1.5"/>
+  <circle cx="30" cy="25" r="6.5" fill="#d9a77a"/>
+  <path d="M23 22 A7 7 0 0 1 37 22 Z" fill="#3a3a3a"/>
+  <!-- hull -->
+  <path d="M5 48 H79 L69 67 H15 Z" fill="#6b4226" stroke="#3e2614" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M10 55 H74" stroke="#8a5a36" stroke-width="3"/>
+  <g fill="#3e2614">
+    <circle cx="24" cy="61" r="1.6"/>
+    <circle cx="42" cy="61" r="1.6"/>
+    <circle cx="60" cy="61" r="1.6"/>
+  </g>
+</svg>

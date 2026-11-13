@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="70" viewBox="0 0 560 70">
+  <defs>
+    <pattern id="bricks" width="56" height="28" patternUnits="userSpaceOnUse" y="12">
+      <rect width="56" height="28" fill="#a89a86"/>
+      <path d="M0 1 H56 M0 15 H56 M1 1 V15 M29 15 V28" stroke="#6f6252" stroke-width="2" fill="none"/>
+      <path d="M4 4 H24 M32 18 H52" stroke="#bcae99" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect x="14" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="17" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="70" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="73" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="126" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="129" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="182" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="185" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="238" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="241" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="294" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="297" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="350" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="353" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="406" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="409" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="462" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="465" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="518" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="521" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="0" y="12" width="560" height="58" fill="url(#bricks)"/>
+  <rect x="0" y="12" width="560" height="5" fill="#cbbfa9"/>
+  <rect x="0" y="17" width="560" height="2" fill="#6f6252"/>
+  
+  
+  
+  <rect x="0" y="66" width="560" height="4" fill="#5a4e40"/>
+  
+</svg>

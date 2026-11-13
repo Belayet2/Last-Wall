@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="70" viewBox="0 0 560 70">
+  <defs>
+    <pattern id="bricks" width="56" height="28" patternUnits="userSpaceOnUse" y="12">
+      <rect width="56" height="28" fill="#a89a86"/>
+      <path d="M0 1 H56 M0 15 H56 M1 1 V15 M29 15 V28" stroke="#6f6252" stroke-width="2" fill="none"/>
+      <path d="M4 4 H24 M32 18 H52" stroke="#bcae99" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect x="14" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="17" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <path d="M70 14 L76 7 L83 11 L90 5 L98 14 Z" fill="#b9ab96" stroke="#6f6252" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="126" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="129" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <path d="M182 14 L188 7 L195 11 L202 5 L210 14 Z" fill="#b9ab96" stroke="#6f6252" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M238 14 L244 7 L251 11 L258 5 L266 14 Z" fill="#b9ab96" stroke="#6f6252" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="294" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="297" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <path d="M350 14 L356 7 L363 11 L370 5 L378 14 Z" fill="#b9ab96" stroke="#6f6252" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="406" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="409" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <path d="M462 14 L468 7 L475 11 L482 5 L490 14 Z" fill="#b9ab96" stroke="#6f6252" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="518" y="0" width="28" height="16" rx="2" fill="#b9ab96" stroke="#6f6252" stroke-width="2"/>
+  <rect x="521" y="2" width="22" height="3" fill="#d2c6b1"/>
+  <rect x="0" y="12" width="560" height="58" fill="url(#bricks)"/>
+  <rect x="0" y="12" width="560" height="5" fill="#cbbfa9"/>
+  <rect x="0" y="17" width="560" height="2" fill="#6f6252"/>
+  <rect x="60" y="40" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <rect x="312" y="26" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <rect x="452" y="54" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <rect x="172" y="54" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <rect x="228" y="40" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <rect x="508" y="40" width="26" height="12" fill="#7e705e" opacity="0.55"/>
+  <path d="M120 17 L150 17 L158 30 L146 44 L128 40 L116 28 Z" fill="#3e352b" stroke="#2a231c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M330 17 L372 17 L366 34 L348 46 L334 34 Z" fill="#3e352b" stroke="#2a231c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M470 40 L494 36 L500 52 L480 60 L466 52 Z" fill="#3e352b" stroke="#2a231c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M90 19 L98 30 L94 40 L104 52" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M250 19 L244 31 L252 42" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M400 30 L412 38 L408 50 L418 62" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M505 19 L512 28" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M150 30 L170 38 L176 52 L190 60" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M366 34 L384 44 L380 58" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 22 L40 36 L36 50" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M210 19 L218 34 L212 46" fill="none" stroke="#3e352b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="0" y="66" width="560" height="4" fill="#5a4e40"/>
+  <rect width="560" height="70" fill="#000" opacity="0.1"/>
+</svg>

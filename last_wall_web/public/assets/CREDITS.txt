@@ -1,0 +1,8 @@
+Last Wall: asset credits
+=========================
+
+All sprites in sprites/ are original SVGs made for this game (no third-party assets).
+License: CC0, free to use.
+
+When you add third-party art or audio, list each file here:
+  file name | author | source URL | license
