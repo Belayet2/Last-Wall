@@ -6,6 +6,39 @@ const RETRY_WAIT := 0.25            # wait when too many stones are already in t
 const INTERVAL_JITTER := 0.15       # +/- 15% random on each throw interval
 const TARGET_EDGE_MARGIN := 60.0    # stones never aim closer than this to the field edge
 const HITBOX_SCALE := 1.3           # enemies are easier to hit than they look
+## The boss on Wall 5: the enemy flagship. It sails left/right on the sea and fires cannonballs.
+## It gets angrier at 2/3 and 1/3 HP (more cannonballs per volley, faster sailing).
+const BOSS := {
+	"name": "The Iron Flagship",
+	"hp": 60,
+	"coins": 100,
+	"y": 134.0,                       # center of the ship on screen (it floats where the sea meets the field)
+	"hitbox": Vector2(230, 90),
+	"enter_time": 2.6,                # it sails in from the right during the intro
+	"first_shot_delay": 2.0,
+	"roam_left": 260.0,               # it sails between these x positions
+	"roam_right": 1020.0,
+	"ball_art": "cannonball",
+	"ball_size": 24.0,
+	"ball_speed": 175.0,
+	"wall_damage": 12,
+	"return_damage": 1,
+	"windup": 1.0,                    # cannon ports glow and marks appear this long before firing
+	"volley_gap": 0.7,                # seconds between the cannons of one volley
+	## Cannon muzzles on ship.png (pixels in the 180x100 image). The ship image is drawn bigger in game.
+	"ports": [Vector2(40, 74), Vector2(70, 74), Vector2(100, 74), Vector2(130, 74)],
+	"image_size": Vector2(180, 100),
+	## Phase 1 starts at full HP; phase 2 below 66%; phase 3 below 33%.
+	"phases": [
+		{"below": 1.01, "interval": 2.2, "volley": 2, "sail_speed": 45.0},
+		{"below": 0.66, "interval": 2.5, "volley": 3, "sail_speed": 70.0},
+		{"below": 0.33, "interval": 2.7, "volley": 4, "sail_speed": 95.0},
+	],
+}
+
+const BOSS_SWEEP_STEP := 210.0      # "sweep" volley: each ball lands this far beside the last one
+const BOSS_CLUSTER_STEP := 55.0     # "cluster" volley: balls land close together (one block catches them all)
+
 const MARKER_BASE_STONE := 22.0     # landing marks grow/shrink with stone size (22 = normal size)
 const MARKER_SCALE_MIN := 0.8
 const MARKER_SCALE_MAX := 1.5

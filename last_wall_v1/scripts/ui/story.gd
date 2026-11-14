@@ -1,62 +1,67 @@
 extends Control
-## Opening story: 3 screens in the throne room. Click / Space / Enter = next.
-## "Skip story" jumps straight into the game.
+## The narrated opening: a slideshow of pictures with the narrator's voice and subtitles.
+## A slide moves on when its voice line ends (or after a reading time if not recorded yet).
+## Click / Space / Enter = next slide. "Skip story" jumps straight into the game.
 
 const StoryData = preload("res://scripts/data/story_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
 const UI = preload("res://scripts/ui/ui_style.gd")
 
-const BOX_TOP := 500.0
-const PORTRAIT_X := 90.0
-
 var _index := -1
-var _speaker := ""
-var _portrait: TextureRect
-var _name_label: Label
-var _text_label: Label
-var _counter: Label
-var _typing: Tween
+var _pictures: Array[TextureRect] = []
+var _front := 0
+var _subtitle: Label
+var _box: PanelContainer
+var _dots: Array[ColorRect] = []
+var _wait := -1.0            # seconds left on this slide (-1 = waiting for the voice to end)
+var _zoom: Tween
+var _leaving := false
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var black := ColorRect.new()
+	black.color = Color(0.1, 0.09, 0.11)
+	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	black.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(black)
+	for i in range(2):                       # two pictures that crossfade
+		var pic := TextureRect.new()
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_SCALE
+		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		pic.pivot_offset = Vector2(640, 360)
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pic.modulate.a = 0.0
+		add_child(pic)
+		_pictures.append(pic)
 
-	var bg := TextureRect.new()
-	bg.texture = ArtData.texture("story_throne_room")
-	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg.stretch_mode = TextureRect.STRETCH_SCALE
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bg)
-
-	_portrait = TextureRect.new()
-	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait.stretch_mode = TextureRect.STRETCH_SCALE
-	_portrait.size = ArtData.size_of("portrait_king")
-	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_portrait)
-
-	var box := UI.panel(30, 18, true)
-	box.position = Vector2(40, BOX_TOP)
-	box.custom_minimum_size = Vector2(1200, 190)
-	add_child(box)
+	_box = UI.panel(30, 16, true)
+	_box.position = Vector2(90, 560)
+	_box.custom_minimum_size = Vector2(1100, 130)
+	add_child(_box)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
-	box.add_child(col)
-	_name_label = UI.label("", 26, UI.ACCENT)
-	col.add_child(_name_label)
-	_text_label = UI.label("", 28)
-	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_text_label.custom_minimum_size = Vector2(1130, 80)
-	_text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(_text_label)
+	_box.add_child(col)
+	_subtitle = UI.label("", 22)
+	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_subtitle.custom_minimum_size = Vector2(1040, 72)
+	col.add_child(_subtitle)
 	var bottom := HBoxContainer.new()
 	col.add_child(bottom)
-	_counter = UI.label("", 16, UI.INK_SOFT)
-	_counter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom.add_child(_counter)
-	bottom.add_child(UI.label("Click or press Space to continue", 16, UI.INK_SOFT))
+	var dots := HBoxContainer.new()
+	dots.add_theme_constant_override("separation", 6)
+	dots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dots.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bottom.add_child(dots)
+	for i in range(StoryData.SLIDES.size()):
+		var d := ColorRect.new()
+		d.custom_minimum_size = Vector2(10, 10)
+		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dots.add_child(d)
+		_dots.append(d)
+	bottom.add_child(UI.label("Click or press Space for the next picture", 15, UI.INK_SOFT))
 
 	var skip := UI.button("Skip story", false, Vector2(160, 42), 18)
 	skip.focus_mode = Control.FOCUS_NONE     # so Space never presses it by accident
@@ -64,7 +69,15 @@ func _ready() -> void:
 	skip.pressed.connect(_start_game)
 	add_child(skip)
 
+	GameState.audio.voice_finished.connect(_on_voice_finished)
 	_next()
+
+
+func _process(delta: float) -> void:
+	if _wait > 0.0:
+		_wait -= delta
+		if _wait <= 0.0:
+			_next()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -72,42 +85,57 @@ func _unhandled_input(event: InputEvent) -> void:
 	var clicked := mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
 	if clicked or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
-		if _typing and _typing.is_running():
-			_typing.kill()
-			_text_label.visible_ratio = 1.0
-		else:
-			_next()
+		GameState.audio.play("click")
+		_next()
 
 
 func _next() -> void:
+	if _leaving:
+		return
 	_index += 1
-	if _index > 0:
-		GameState.audio.play("click")
-	if _index >= StoryData.LINES.size():
+	if _index >= StoryData.SLIDES.size():
 		_start_game()
 		return
-	var line: Dictionary = StoryData.LINES[_index]
-	_counter.text = "%d / %d" % [_index + 1, StoryData.LINES.size()]
-	_name_label.text = line["speaker"]
-	_text_label.text = line["text"]
-	_text_label.visible_ratio = 0.0
-	var text: String = line["text"]
-	_typing = create_tween()
-	_typing.tween_property(_text_label, "visible_ratio", 1.0, text.length() * StoryData.TYPE_TIME_PER_CHAR)
+	var slide: Dictionary = StoryData.SLIDES[_index]
+	for i in range(_dots.size()):
+		_dots[i].color = UI.PIP_ON if i <= _index else UI.PIP_OFF
 
-	if line["speaker"] != _speaker:
-		_speaker = line["speaker"]
-		_portrait.texture = ArtData.texture(line["portrait"])
-		var left: bool = line["side"] == "left"
-		var x := PORTRAIT_X if left else 1280.0 - PORTRAIT_X - _portrait.size.x
-		var from := x - 80.0 if left else x + 80.0
-		_portrait.position = Vector2(from, BOX_TOP - _portrait.size.y + 2)
-		_portrait.modulate.a = 0.0
-		var slide := create_tween().set_parallel(true)
-		slide.tween_property(_portrait, "position:x", x, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		slide.tween_property(_portrait, "modulate:a", 1.0, 0.25)
+	# crossfade to the new picture, which slowly zooms in
+	var old := _pictures[_front]
+	_front = 1 - _front
+	var pic := _pictures[_front]
+	pic.texture = ArtData.texture(slide["image"])
+	pic.scale = Vector2.ONE
+	move_child(pic, old.get_index())         # new picture goes under the old one, then the old fades out
+	pic.modulate.a = 1.0
+	var fade := create_tween()
+	fade.tween_property(old, "modulate:a", 0.0, StoryData.FADE_TIME)
+	if _zoom:
+		_zoom.kill()
+	_zoom = create_tween()
+	_zoom.tween_property(pic, "scale", Vector2.ONE * StoryData.ZOOM, 14.0)
+
+	var text: String = slide["text"]
+	_subtitle.text = text
+	_box.modulate.a = 0.0
+	create_tween().tween_property(_box, "modulate:a", 1.0, 0.4)
+
+	if GameState.audio.play_voice(slide["voice"]):
+		_wait = -1.0                         # move on when the voice line ends
+	else:
+		var words := text.split(" ").size()
+		_wait = maxf(StoryData.MIN_SLIDE_TIME, words * StoryData.SECONDS_PER_WORD)
+
+
+func _on_voice_finished() -> void:
+	if _wait < 0.0 and not _leaving:
+		_wait = StoryData.PAUSE_AFTER_VOICE
 
 
 func _start_game() -> void:
+	if _leaving:
+		return
+	_leaving = true
+	GameState.audio.stop_voice()
 	GameState.reset()
 	get_tree().change_scene_to_file("res://scenes/game.tscn")

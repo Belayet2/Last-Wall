@@ -18,6 +18,7 @@ var wall_damage := 0
 var return_damage := 1
 var diameter := 20.0
 var marker: Node2D = null   # landing marker, removed when the stone is bounced or gone
+var art := "stone"          # picture while hostile ("cannonball" for the boss)
 
 var _life := 0.0
 var _gone := false
@@ -44,7 +45,7 @@ func _ready() -> void:
 	var shape := CollisionShape2D.new()
 	shape.shape = circle
 	add_child(shape)
-	_sprite = ArtData.make_sprite("stone", Vector2(diameter, diameter))
+	_sprite = ArtData.make_sprite(art, Vector2(diameter, diameter))
 	add_child(_sprite)
 	area_entered.connect(_on_area_entered)
 	_fx = get_tree().get_first_node_in_group("fx")

@@ -1,5 +1,5 @@
 extends SceneTree
-## Synthesizes the placeholder sounds and the music loop into assets/audio/ (.wav).
+## Synthesizes the placeholder sound effects into assets/audio/ (.wav). (No music.)
 ## Run from the project folder:
 ##   godot --headless --path . --script res://tools/make_placeholder_audio.gd
 ## Existing files are NOT overwritten. Add "-- --force" to redo all, or "-- --only=bounce,coin".
@@ -36,7 +36,11 @@ func _init() -> void:
 	_save("wall_fell", _wall_fell)
 	_save("victory", _victory)
 	_save("defeat", _defeat)
-	_save("music_loop", _music)
+	_save("repair", _repair)
+	_save("cannon", _cannon)
+	_save("ship_hit", _ship_hit)
+	_save("explosion", _explosion)
+	_save("boss_horn", _boss_horn)
 	quit()
 
 
@@ -227,36 +231,45 @@ func _defeat() -> PackedFloat32Array:
 	return _arpeggio([64, 63, 62, 60], 0.35, 1.0, "tri", 0.3)
 
 
-# ---------------------------------------------------------------- music (8 bars, loops)
+# ---------------------------------------------------------------- boss and repair
 
-func _music() -> PackedFloat32Array:
-	var bpm := 112.0
-	var eighth := 60.0 / bpm / 2.0
-	# melody, one MIDI note per eighth (-1 = rest)
-	var melody := [
-		72, 76, 79, 76, 84, 79, 76, 79,
-		81, 79, 76, 72, 76, -1, 74, 76,
-		77, 81, 84, 81, 79, 77, 76, 74,
-		74, 79, 83, 79, 74, -1, 79, -1,
-		84, 83, 81, 79, 76, 79, 84, -1,
-		81, 79, 77, 81, 84, 81, 77, 76,
-		79, -1, 74, 79, 83, 81, 79, 74,
-		76, 74, 72, 76, 72, -1, -1, -1,
-	]
-	var bass_roots := [48, 45, 41, 43, 48, 41, 43, 48]
-	var b := _buf(eighth * melody.size())
-	for i in range(melody.size()):
-		var n: int = melody[i]
-		if n > 0:
-			_note(b, i * eighth, eighth * 0.95, _midi(n), _midi(n), "pulse", 0.11, 0.004, 1.2)
-	for bar in range(8):
-		var root: int = bass_roots[bar]
-		var pattern := [root, root, root + 7, root]
-		for beat in range(4):
-			var start := (bar * 8 + beat * 2) * eighth
-			var bn: float = pattern[beat]
-			_note(b, start, eighth * 1.9, _midi(bn), _midi(bn), "tri", 0.22, 0.004, 1.0)
-			if beat % 2 == 0:
-				_note(b, start, 0.12, 120, 45, "sine", 0.35, 0.001, 2.0)   # kick
-			_noise(b, start + eighth, 0.03, 0.06, 0.9, 0.9)               # hi-hat on the off-beat
+func _repair() -> PackedFloat32Array:
+	var b := _buf(0.5)
+	for i in range(3):
+		_noise(b, i * 0.12, 0.08, 0.5, 0.5, 0.2)                  # hammer knocks
+		_note(b, i * 0.12, 0.08, 520, 480, "tri", 0.35, 0.001, 2.0)
+	_note(b, 0.36, 0.14, 1047, 1047, "square", 0.15, 0.002, 2.0)
+	return b
+
+
+func _cannon() -> PackedFloat32Array:
+	var b := _buf(0.7)
+	_note(b, 0.0, 0.5, 90, 35, "sine", 1.0, 0.001, 1.5)
+	_noise(b, 0.0, 0.6, 0.9, 0.5, 0.03, 1.8)
+	return b
+
+
+func _ship_hit() -> PackedFloat32Array:
+	var b := _buf(0.35)
+	_noise(b, 0.0, 0.2, 0.7, 0.6, 0.15)
+	_note(b, 0.0, 0.25, 210, 120, "square", 0.25, 0.001, 2.0)
+	return b
+
+
+func _explosion() -> PackedFloat32Array:
+	var b := _buf(1.3)
+	_note(b, 0.0, 1.0, 70, 25, "sine", 1.0, 0.001, 1.2)
+	_noise(b, 0.0, 1.2, 1.0, 0.6, 0.02, 1.4)
+	for i in range(10):
+		_noise(b, rng.randf_range(0.05, 0.8), 0.05, 0.5, 0.7, 0.3)
+	return b
+
+
+func _boss_horn() -> PackedFloat32Array:
+	var b := _buf(2.0)
+	_note(b, 0.0, 0.9, _midi(43), _midi(43), "saw", 0.3, 0.08, 0.6)
+	_note(b, 0.0, 0.9, _midi(55), _midi(55), "saw", 0.15, 0.08, 0.6)
+	_note(b, 0.9, 1.1, _midi(46), _midi(46), "saw", 0.3, 0.08, 1.0)
+	_note(b, 0.9, 1.1, _midi(58), _midi(58), "saw", 0.15, 0.08, 1.0)
+	_note(b, 0.0, 1.8, 55, 50, "sine", 0.4, 0.05, 1.0)
 	return b

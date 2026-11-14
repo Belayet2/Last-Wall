@@ -19,6 +19,8 @@ const WORLD_OUTLINE := Color8(84, 56, 30)
 const DIM := Color(0.25, 0.2, 0.12, 0.28)          # screen tint behind popups
 const PIP_ON := Color8(236, 170, 40)
 const PIP_OFF := Color8(214, 202, 180)
+const BOSS_BAR := Color8(214, 66, 52)
+const BANNER := Color8(255, 214, 120)              # big boss announcements
 
 
 ## opaque = no see-through (for big panels over busy backgrounds).

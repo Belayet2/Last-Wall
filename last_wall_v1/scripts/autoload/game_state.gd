@@ -17,7 +17,6 @@ var coins := 0
 var current_wall := 1
 var upgrade_levels: Dictionary = {}
 var wall_hp: Array[int] = []    # one entry per wall; FALLEN = held by the enemy
-var repair_hp := 0              # extra HP bought for the next wall we fight on
 
 # end-of-game info (shown on the win / lose screen)
 var last_result := ""           # "win" or "lose"
@@ -35,7 +34,6 @@ func _ready() -> void:
 func reset() -> void:
 	coins = ShopData.START_COINS
 	current_wall = 1
-	repair_hp = 0
 	last_result = ""
 	enemies_defeated = 0
 	falls = 0
@@ -70,22 +68,14 @@ func wall_title(number: int) -> String:
 	return LevelData.WALLS[number - 1]["title"]
 
 
-## HP the current wall will start the next wave with (including repairs).
-func next_start_hp() -> int:
-	var max_hp := wall_max_hp(current_wall)
+## Called when a wave starts. Returns the wall's starting HP.
+## (A fallen wall that was never repaired still gets the free patch.)
+func begin_wave() -> int:
 	var hp := wall_hp[current_wall - 1]
 	if hp == FALLEN:
-		hp = ceili(max_hp * ShopData.FALLEN_WALL_START_HP)
-	return mini(hp + repair_hp, max_hp)
-
-
-## Called when a wave starts. Returns the wall's starting HP and uses up repairs.
-func begin_wave() -> int:
-	var hp := next_start_hp()
-	wall_hp[current_wall - 1] = hp
-	repair_hp = 0
+		hp = repair_base_hp()
+		wall_hp[current_wall - 1] = hp
 	return hp
-
 
 ## The wave on the current wall was cleared: heal it and pay the retake bonus.
 ## Returns the bonus.
@@ -141,13 +131,50 @@ func buy_upgrade(key: String) -> bool:
 	return true
 
 
-func can_repair() -> bool:
-	return next_start_hp() < wall_max_hp(current_wall)
+# ---------------------------------------------------------------- repairs
+# When the hero moves out to a fallen wall, he pays to repair it before the fight.
+# It always gets a free patch (FALLEN_WALL_FREE_HP); every repair "step" adds REPAIR_STEP of max HP.
+
+func needs_repair() -> bool:
+	return wall_hp[current_wall - 1] == FALLEN
 
 
-func buy_repair() -> bool:
-	if not can_repair() or coins < ShopData.REPAIR_COST:
+func repair_base_hp() -> int:
+	return ceili(wall_max_hp(current_wall) * ShopData.FALLEN_WALL_FREE_HP)
+
+
+func repair_step_hp() -> int:
+	return ceili(wall_max_hp(current_wall) * ShopData.REPAIR_STEP)
+
+
+func repair_step_cost() -> int:
+	return ceili(repair_step_hp() * ShopData.REPAIR_COINS_PER_HP)
+
+
+## Most steps that make sense (up to full HP).
+func repair_max_steps() -> int:
+	return ceili(float(wall_max_hp(current_wall) - repair_base_hp()) / repair_step_hp())
+
+
+## Most steps the player can pay for right now.
+func repair_affordable_steps() -> int:
+	return mini(repair_max_steps(), floori(float(coins) / repair_step_cost()))
+
+
+func repair_hp_for(steps: int) -> int:
+	return mini(repair_base_hp() + steps * repair_step_hp(), wall_max_hp(current_wall))
+
+
+func repair_cost_for(steps: int) -> int:
+	return steps * repair_step_cost()
+
+
+## Pays and sets the wall's starting HP. Returns false if there are not enough coins.
+func repair_wall(steps: int) -> bool:
+	var cost := repair_cost_for(steps)
+	if steps < 0 or cost > coins:
 		return false
-	repair_hp += ShopData.REPAIR_HP
-	add_coins(-ShopData.REPAIR_COST)
+	wall_hp[current_wall - 1] = repair_hp_for(steps)
+	if cost > 0:
+		add_coins(-cost)
 	return true

@@ -1,10 +1,12 @@
-## Coins and shop. Tune freely.
+## Coins, shop and repairs. Tune freely.
 
 const START_COINS := 0
 const RETAKE_BONUS_PER_WALL := 40   # bonus = this * wall number, paid every time a wave is cleared
-const FALLEN_WALL_START_HP := 0.5   # a retaken wall starts at 50% HP (plus any repair bought)
-const REPAIR_HP := 25
-const REPAIR_COST := 15
+
+# --- Repairing a retaken wall (you pay before you fight on it) ---
+const FALLEN_WALL_FREE_HP := 0.2    # your men patch a retaken wall to 20% for free (so you never start at 0)
+const REPAIR_STEP := 0.1            # each repair step adds 10% of the wall's max HP
+const REPAIR_COINS_PER_HP := 0.3    # price: a step that adds 26 HP costs ceil(26 * 0.3) = 8 coins
 
 ## "costs" has one entry per level, so its length is the max level.
 const UPGRADES := {

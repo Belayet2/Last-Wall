@@ -11,6 +11,7 @@ const FxData = preload("res://scripts/data/fx_data.gd")
 
 var max_hp := 300
 var hp := 300
+var art := "wall_1"     # picture prefix: wall_1_whole / wall_1_cracked / wall_1_broken
 
 var _sprite: Sprite2D
 var _look := ""
@@ -18,9 +19,10 @@ var _flash: Tween
 var _jiggle: Tween
 
 
-func setup(new_max_hp: int, start_hp: int) -> void:
+func setup(new_max_hp: int, start_hp: int, art_prefix: String = "wall_1") -> void:
 	max_hp = new_max_hp
 	hp = start_hp
+	art = art_prefix
 
 
 func _ready() -> void:
@@ -83,11 +85,11 @@ func heal_full() -> void:
 ## Picks whole / cracked / broken. Returns true if the look changed.
 func _update_look() -> bool:
 	var ratio := float(hp) / float(max_hp)
-	var key := "wall_whole"
+	var key := art + "_whole"
 	if hp <= 0:
-		key = "wall_broken"
+		key = art + "_broken"
 	elif ratio < GameData.WALL_CRACKED_BELOW:
-		key = "wall_cracked"
+		key = art + "_cracked"
 	if key == _look:
 		return false
 	var first := _look == ""

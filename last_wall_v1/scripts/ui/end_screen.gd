@@ -1,5 +1,6 @@
 extends Control
-## Win / lose screen (reads GameState.last_result). Throne room, a portrait, the result and a few stats.
+## Win / lose screen (reads GameState.last_result). Throne room, a portrait, the narrator's closing line
+## (with the recorded voice if it exists) and a few stats.
 
 const StoryData = preload("res://scripts/data/story_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
@@ -13,6 +14,8 @@ func _ready() -> void:
 	var won := GameState.last_result == "win"
 	var info: Dictionary = StoryData.WIN if won else StoryData.LOSE
 	GameState.audio.play("victory" if won else "defeat")
+	var voice: String = info["voice"]
+	create_tween().tween_callback(func() -> void: GameState.audio.play_voice(voice)).set_delay(1.6)   # after the jingle
 
 	var bg := TextureRect.new()
 	bg.texture = ArtData.texture("story_throne_room")
@@ -38,8 +41,7 @@ func _ready() -> void:
 	col.add_theme_constant_override("separation", 10)
 	panel.add_child(col)
 	col.add_child(UI.label(info["title"], 64, UI.ACCENT))
-	col.add_child(UI.label(info["speaker"], 20, UI.INK_SOFT))
-	var quote := UI.label("\"%s\"" % info["text"], 28)
+	var quote := UI.label(info["text"], 24)
 	quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	quote.custom_minimum_size = Vector2(600, 0)
 	col.add_child(quote)
@@ -71,9 +73,11 @@ func _ready() -> void:
 
 
 func _play_again() -> void:
+	GameState.audio.stop_voice()
 	GameState.reset()
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 
 func _to_menu() -> void:
+	GameState.audio.stop_voice()
 	get_tree().change_scene_to_file("res://scenes/main.tscn")

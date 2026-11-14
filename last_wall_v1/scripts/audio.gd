@@ -1,32 +1,35 @@
 extends Node
-## Plays sound effects and the music loop. Lives under the GameState autoload,
-## so the music keeps playing between scenes. Use: GameState.audio.play("bounce")
-## Press M to mute / unmute everything.
+## Plays sound effects and the narrator's voice. Lives under the GameState autoload,
+## so a voice line keeps playing between scenes. Use: GameState.audio.play("bounce")
+## Press M to mute / unmute everything. (There is no background music.)
+
+signal voice_finished
 
 const AudioData = preload("res://scripts/data/audio_data.gd")
 
 var _streams := {}           # name -> AudioStream
 var _last_played := {}       # name -> time (seconds)
-var _voices: Array[AudioStreamPlayer] = []
-var _next_voice := 0
-var _music: AudioStreamPlayer
+var _players: Array[AudioStreamPlayer] = []
+var _next_player := 0
+var _voice: AudioStreamPlayer
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS   # sounds and music keep going while paused
+	process_mode = Node.PROCESS_MODE_ALWAYS   # sounds keep going while paused
 	for sound_name in AudioData.SOUNDS:
-		var stream := _load(sound_name)
+		var stream := _find(AudioData.FOLDER, sound_name)
 		if stream:
 			_streams[sound_name] = stream
+		else:
+			push_warning("Missing sound: " + sound_name)
 	for i in range(AudioData.VOICES):
 		var p := AudioStreamPlayer.new()
 		add_child(p)
-		_voices.append(p)
-	_music = AudioStreamPlayer.new()
-	_music.stream = _load(AudioData.MUSIC)
-	_music.volume_db = AudioData.MUSIC_VOLUME_DB
-	_music.finished.connect(_music.play)     # loop
-	add_child(_music)
+		_players.append(p)
+	_voice = AudioStreamPlayer.new()
+	_voice.volume_db = AudioData.VOICE_VOLUME_DB
+	_voice.finished.connect(func() -> void: voice_finished.emit())
+	add_child(_voice)
 
 
 func play(sound_name: String) -> void:
@@ -36,18 +39,32 @@ func play(sound_name: String) -> void:
 	if now - float(_last_played.get(sound_name, -1.0)) < AudioData.SAME_SOUND_GAP:
 		return
 	_last_played[sound_name] = now
-	var p := _voices[_next_voice]
-	_next_voice = (_next_voice + 1) % _voices.size()
+	var p := _players[_next_player]
+	_next_player = (_next_player + 1) % _players.size()
 	p.stream = _streams[sound_name]
 	p.volume_db = AudioData.SFX_VOLUME_DB + float(AudioData.SOUNDS[sound_name])
 	p.pitch_scale = 1.0 + randf_range(-AudioData.PITCH_JITTER, AudioData.PITCH_JITTER)
 	p.play()
 
 
-## Starts the music (call it from a click: browsers only allow sound after one).
-func start_music() -> void:
-	if _music.stream and not _music.playing:
-		_music.play()
+## Plays a narrator line from assets/audio/voice/ (e.g. "narration_01").
+## Returns false if that recording does not exist yet (the game then just shows the text).
+func play_voice(line_name: String) -> bool:
+	stop_voice()
+	var stream := _find(AudioData.VOICE_FOLDER, line_name)
+	if stream == null:
+		return false
+	_voice.stream = stream
+	_voice.play()
+	return true
+
+
+func stop_voice() -> void:
+	_voice.stop()
+
+
+func is_voice_playing() -> bool:
+	return _voice.playing
 
 
 ## Quit the game cleanly: stop every sound first, then close a moment later
@@ -68,11 +85,11 @@ func _enter_tree() -> void:
 
 
 func _stop_all() -> void:
-	for p in _voices:
+	for p in _players:
 		p.stop()
 		p.stream = null
-	_music.stop()
-	_music.stream = null
+	_voice.stop()
+	_voice.stream = null
 	_streams.clear()
 
 
@@ -81,10 +98,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		AudioServer.set_bus_mute(0, not AudioServer.is_bus_mute(0))
 
 
-func _load(sound_name: String) -> AudioStream:
+func _find(folder: String, file_name: String) -> AudioStream:
 	for ext in AudioData.EXTENSIONS:
-		var path: String = AudioData.FOLDER + sound_name + ext
+		var path: String = folder + file_name + ext
 		if ResourceLoader.exists(path):
 			return load(path)
-	push_warning("Missing sound: " + sound_name)
 	return null

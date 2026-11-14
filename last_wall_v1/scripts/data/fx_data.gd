@@ -66,3 +66,52 @@ const WALL_RUBBLE := {
 const TRAIL := {
 	"amount": 18, "lifetime": 0.3, "size_min": 2.0, "size_max": 4.0, "color": Color(1.0, 0.82, 0.3),
 }
+
+# ---------------------------------------------------------------- boss (Wall 5)
+const SHAKE_CANNON := 3.0
+const SHAKE_BOSS_BOOM := 10.0
+const SHAKE_BOSS_ARRIVE := 8.0
+const BOSS_EXPLOSIONS := 6           # explosions on the flagship before it sinks
+const BOSS_EXPLOSION_GAP := 0.3
+const BOSS_SINK_TIME := 1.8
+
+const PORT_GLOW := {
+	"amount": 10, "lifetime": 0.6, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 10.0, "speed_max": 40.0, "gravity": Vector2(0, -20), "damping": 10.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(1.0, 0.55, 0.15),
+}
+const MUZZLE_FLASH := {
+	"amount": 18, "lifetime": 0.25, "direction": Vector2(0, 1), "spread": 40.0,
+	"speed_min": 80.0, "speed_max": 200.0, "gravity": Vector2(0, 0), "damping": 200.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(1.0, 0.8, 0.3),
+}
+const CANNON_SMOKE := {
+	"amount": 14, "lifetime": 0.9, "direction": Vector2(0, -1), "spread": 120.0,
+	"speed_min": 20.0, "speed_max": 60.0, "gravity": Vector2(0, -30), "damping": 30.0,
+	"size_min": 5.0, "size_max": 10.0, "color": Color(0.85, 0.85, 0.85, 0.8),
+}
+const WOOD_CHIPS := {
+	"amount": 14, "lifetime": 0.6, "direction": Vector2(0, -1), "spread": 160.0,
+	"speed_min": 80.0, "speed_max": 200.0, "gravity": Vector2(0, 420), "damping": 0.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(0.55, 0.36, 0.2),
+}
+const EXPLOSION := {
+	"amount": 40, "lifetime": 0.7, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 80.0, "speed_max": 260.0, "gravity": Vector2(0, 200), "damping": 60.0,
+	"size_min": 4.0, "size_max": 9.0, "color": Color(1.0, 0.6, 0.15),
+}
+const SPLASH := {
+	"amount": 60, "lifetime": 1.0, "direction": Vector2(0, -1), "spread": 60.0,
+	"speed_min": 100.0, "speed_max": 260.0, "gravity": Vector2(0, 400), "damping": 10.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(0.85, 0.95, 1.0),
+	"rect": Vector2(120, 6),
+}
+## Continuous smoke / fire on the damaged flagship.
+const SHIP_SMOKE := {
+	"amount": 24, "lifetime": 1.4, "size_min": 5.0, "size_max": 10.0,
+	"speed_min": 20.0, "speed_max": 50.0, "color": Color(0.5, 0.5, 0.52, 0.7),
+}
+const SHIP_FIRE := {
+	"amount": 30, "lifetime": 0.5, "size_min": 3.0, "size_max": 6.0,
+	"speed_min": 30.0, "speed_max": 70.0, "color": Color(1.0, 0.55, 0.1),
+}

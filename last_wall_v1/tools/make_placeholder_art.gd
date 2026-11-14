@@ -50,12 +50,18 @@ func _init() -> void:
 	_save("enemy_slinger_windup", _slinger.bind(true))
 	_save("enemy_catapult", _catapult.bind(false))
 	_save("enemy_catapult_windup", _catapult.bind(true))
-	_save("wall_whole", _wall.bind(0))
-	_save("wall_cracked", _wall.bind(1))
-	_save("wall_broken", _wall.bind(2))
+	for n in range(1, 6):
+		_save("wall_%d_whole" % n, _wall.bind(0, n))
+		_save("wall_%d_cracked" % n, _wall.bind(1, n))
+		_save("wall_%d_broken" % n, _wall.bind(2, n))
+	for n in range(1, 5):
+		_save("ruins_%d" % n, _ruins.bind(n + 1))
+	_save("sea", _sea)
+	_save("beach", _beach)
+	_save("ship", _ship)
+	_save("cannonball", _cannonball)
 	_save("ground", _ground)
 	_save("path", _path)
-	_save("ruins", _ruins)
 	_save("edge_rocks", _edge_rocks)
 	_save("marker", _marker)
 	_save("icon_wall", _icon_wall)
@@ -67,6 +73,13 @@ func _init() -> void:
 	_save("portrait_king", _portrait_king)
 	_save("portrait_commander", _portrait_commander)
 	_save("portrait_messenger", _portrait_messenger)
+	_save("story_map", _story_map.bind(false))
+	_save("story_kings", _story_kings)
+	_save("story_field", _story_field)
+	_save("story_ships", _story_ships)
+	_save("story_map_fallen", _story_map.bind(true))
+	_save("story_king_calls", _story_king_calls)
+	_save("story_hero", _story_hero)
 	quit()
 
 
@@ -415,14 +428,54 @@ func _catapult(windup: bool) -> Image:
 
 # ---------------------------------------------------------------- world (full 1280 width)
 
-func _wall(damage: int) -> Image:
+## The 5 walls look different. 1 = innermost (the Last Wall) ... 5 = the Sea Wall on the shore.
+const WALL_STYLES := [
+	{},  # (unused, walls are numbered from 1)
+	{"stone": Color8(228, 222, 208), "mortar": Color8(180, 172, 156), "bw": 42, "bh": 14, "extra": "plain"},
+	{"stone": Color8(224, 192, 136), "mortar": Color8(178, 144, 94), "bw": 32, "bh": 12, "extra": "sand"},
+	{"stone": Color8(194, 104, 78), "mortar": Color8(232, 214, 190), "bw": 22, "bh": 9, "extra": "brick"},
+	{"stone": Color8(168, 176, 152), "mortar": Color8(122, 132, 110), "bw": 36, "bh": 16, "extra": "moss"},
+	{"stone": Color8(146, 164, 178), "mortar": Color8(104, 120, 134), "bw": 50, "bh": 18, "extra": "sea"},
+]
+
+
+func _wall(damage: int, style_index: int = 1) -> Image:
+	var style: Dictionary = WALL_STYLES[style_index]
+	var stone: Color = style["stone"]
+	var mortar: Color = style["mortar"]
+	var extra: String = style["extra"]
 	var w := 1280
 	var h := 96
 	var img := _img(w, h)
 	for mx in range(0, w, 50):
-		_bricks(img, Rect2i(mx + 5, 0, 30, 20), WALL_STONE, MORTAR, 15, 10, 0.05)
-	_bricks(img, Rect2i(0, 18, w, h - 18), WALL_STONE, MORTAR, 38, 13, 0.06)
-	_rect(img, 0, 18, w, 2, WALL_STONE.lightened(0.2))
+		_bricks(img, Rect2i(mx + 5, 0, 30, 20), stone, mortar, 15, 10, 0.05)
+	_bricks(img, Rect2i(0, 18, w, h - 18), stone, mortar, style["bw"], style["bh"], 0.06)
+	_rect(img, 0, 18, w, 2, stone.lightened(0.2))
+	match extra:
+		"brick":
+			var band := Color8(238, 228, 208)
+			_bricks(img, Rect2i(0, 18, w, 7), band, Color8(200, 188, 166), 40, 7, 0.02)
+			_bricks(img, Rect2i(0, 86, w, 10), band, Color8(200, 188, 166), 40, 10, 0.02)
+		"sand":
+			for i in range(40):
+				var sy := rng.randi_range(24, 90)
+				_rect(img, rng.randi_range(0, w - 80), sy, rng.randi_range(30, 80), 1, stone.darkened(0.12))
+		"moss":
+			for i in range(60):
+				var mx := rng.randf_range(0, w)
+				var my := rng.randf_range(20, 94) if rng.randf() < 0.4 else rng.randf_range(80, 96)
+				_ellipse(img, mx, my, rng.randf_range(6, 18), rng.randf_range(3, 6), Color(0.42, 0.6, 0.28, 0.75))
+			for i in range(14):                       # ivy hanging from the top
+				var ix := rng.randf_range(10, w - 10)
+				var ylen := rng.randi_range(20, 60)
+				for k in range(0, ylen, 3):
+					_circle(img, ix + sin(k * 0.3) * 3.0, 20 + k, 2.2, Color8(88, 140, 60))
+		"sea":
+			_rect(img, 0, 80, w, 16, Color(0.2, 0.35, 0.45, 0.25))  # wet, darker base
+			for i in range(80):
+				_ellipse(img, rng.randf_range(0, w), rng.randf_range(86, 96), rng.randf_range(4, 10), rng.randf_range(2, 5), Color(0.3, 0.42, 0.22, 0.85))
+			for i in range(260):
+				_circle(img, rng.randf_range(0, w), rng.randf_range(60, 94), 1.2, Color8(226, 222, 210))
 	# the kingdom's banners (blue, like the hero's cape)
 	for bx in [430, 830]:
 		if damage == 2 and bx == 830:
@@ -434,10 +487,9 @@ func _wall(damage: int) -> Image:
 		_rect(img, bx + 9, 32, 4, 12 if bh > 30 else 6, GOLD)
 		if bh > 30:
 			_rect(img, bx + 5, 36, 12, 3, GOLD)
-			_clear(img, bx + 8, 24 + bh - 6, 6, 6)
 	# the door (decoration)
 	var dcx := w >> 1
-	var frame := Color8(72, 62, 52)
+	var frame := stone.darkened(0.45)
 	_circle(img, dcx, 54, 37, frame)
 	_rect(img, dcx - 37, 54, 74, 42, frame)
 	if damage < 2:
@@ -449,12 +501,12 @@ func _wall(damage: int) -> Image:
 		_rect(img, dcx - 31, 84, 62, 3, Color8(60, 60, 66))
 		_circle(img, dcx + 18, 76, 3, Color8(200, 170, 70))
 	else:
-		_circle(img, dcx, 58, 30, Color8(24, 20, 18))
-		_rect(img, dcx - 30, 58, 60, 38, Color8(24, 20, 18))
+		_circle(img, dcx, 58, 30, Color8(40, 34, 30))
+		_rect(img, dcx - 30, 58, 60, 38, Color8(40, 34, 30))
 		_line(img, dcx - 26, 92, dcx - 6, 60, WOOD_DARK, 4)
 		_line(img, dcx + 22, 94, dcx + 10, 72, WOOD, 3)
 
-	var crack := Color8(112, 102, 92)
+	var crack := stone.darkened(0.45)
 	if damage >= 1:
 		var crack_count := 12 if damage == 1 else 24
 		for i in range(crack_count):
@@ -473,7 +525,7 @@ func _wall(damage: int) -> Image:
 			var bx := rng.randi_range(0, w - 40)
 			if absi(bx - dcx) < 60:
 				continue
-			_rect(img, bx, rng.randi_range(22, 80), rng.randi_range(14, 34), rng.randi_range(6, 12), Color8(160, 150, 132))
+			_rect(img, bx, rng.randi_range(22, 80), rng.randi_range(14, 34), rng.randi_range(6, 12), stone.darkened(0.25))
 	if damage >= 2:
 		var top := 22.0
 		for x in range(w):
@@ -483,11 +535,10 @@ func _wall(damage: int) -> Image:
 		for i in range(120):
 			var rx := rng.randf_range(0, w)
 			var r := rng.randf_range(3, 8)
-			_circle(img, rx, h - rng.randf_range(2, 10), r, WALL_STONE.darkened(rng.randf_range(0.05, 0.35)))
+			_circle(img, rx, h - rng.randf_range(2, 10), r, stone.darkened(rng.randf_range(0.05, 0.35)))
 	_speckle(img, Rect2i(0, 0, w, h), 5000, 0.05)
 	_outline(img)
 	return img
-
 
 func _ground() -> Image:
 	var w := 1280
@@ -523,21 +574,26 @@ func _path() -> Image:
 	return img
 
 
-## The enemy side: the captured outer wall in ruins, red enemy banners, dusk sky.
-func _ruins() -> Image:
+## Sky with soft clouds (used by the ruins and the sea).
+func _sky(img: Image, h: int) -> void:
+	for y in range(h):
+		_rect(img, 0, y, img.get_width(), 1, _sky_color(y))
+	for cx in [180.0, 520.0, 860.0, 1150.0]:
+		var cy := rng.randf_range(16, 36)
+		for k in range(6):
+			_ellipse(img, cx + k * 14 - 35 + rng.randf_range(-5, 5), cy + rng.randf_range(-4, 4), rng.randf_range(14, 22), rng.randf_range(7, 11), Color(1, 1, 1, 0.55))
+
+
+## The enemy side for walls 1-4: the NEXT wall out (style_index), captured and in ruins.
+func _ruins(style_index: int) -> Image:
+	var style: Dictionary = WALL_STYLES[style_index]
 	var w := 1280
 	var h := 150
 	var img := _img(w, h)
-	for y in range(h):
-		_rect(img, 0, y, w, 1, _sky_color(y))
-	# soft white clouds
-	for cx in [180.0, 520.0, 860.0, 1150.0]:
-		var cy := rng.randf_range(18, 40)
-		for k in range(6):
-			_ellipse(img, cx + k * 14 - 35 + rng.randf_range(-5, 5), cy + rng.randf_range(-4, 4), rng.randf_range(14, 22), rng.randf_range(7, 11), Color(1, 1, 1, 0.55))
-	var enemy_stone := Color8(162, 156, 162)
-	_bricks(img, Rect2i(0, 56, w, 94), enemy_stone, Color8(124, 118, 126), 34, 12, 0.05)
-	# broken top edge (higher at the corners: stumps of old towers)
+	_sky(img, h)
+	var enemy_stone: Color = (style["stone"] as Color).lerp(Color8(150, 146, 150), 0.35)
+	var mortar: Color = (style["mortar"] as Color).lerp(Color8(110, 106, 112), 0.35)
+	_bricks(img, Rect2i(0, 56, w, 94), enemy_stone, mortar, style["bw"], style["bh"], 0.05)
 	var top := 70.0
 	for x in range(w):
 		var corner := 1.0 - clampf(minf(x, w - x) / 70.0, 0.0, 1.0)
@@ -545,24 +601,77 @@ func _ruins() -> Image:
 		var cut := int(lerpf(top, 58.0, corner))
 		for y in range(56, cut):
 			img.set_pixel(x, y, _sky_color(y))
-		img.set_pixel(x, cut, Color8(104, 98, 106))
-	# a few dark gaps in the broken wall (soft, not pure black)
+		img.set_pixel(x, cut, enemy_stone.darkened(0.4))
 	for i in range(9):
 		var hx := rng.randf_range(40, w - 40)
 		var hy := rng.randf_range(102, 124)
 		var hr := rng.randf_range(7, 14)
-		_ellipse(img, hx, hy, hr + 2, hr * 0.6 + 2, Color8(134, 128, 136))
-		_ellipse(img, hx, hy + 1, hr, hr * 0.6, Color8(112, 106, 116))
+		_ellipse(img, hx, hy, hr + 2, hr * 0.6 + 2, enemy_stone.darkened(0.15))
+		_ellipse(img, hx, hy + 1, hr, hr * 0.6, enemy_stone.darkened(0.3))
 	for bx in [390, 890]:
 		_rect(img, bx, 30, 2, 50, Color8(60, 44, 34))
 		_rect(img, bx + 2, 32, 20, 24, Color8(150, 30, 30))
-		_clear(img, bx + 13, 50, 9, 6)
-	_rect(img, 0, 136, w, 14, Color8(150, 142, 136))
+	_rect(img, 0, 136, w, 14, enemy_stone.darkened(0.08))
 	for i in range(140):
 		_circle(img, rng.randf_range(0, w), rng.randf_range(132, 148), rng.randf_range(2, 6), enemy_stone.darkened(rng.randf_range(0, 0.3)))
 	_speckle(img, Rect2i(0, 56, w, 94), 5000, 0.05)
 	return img
 
+
+## The enemy side for wall 5: open sea, the enemy fleet far away, a strip of beach.
+func _sea() -> Image:
+	var w := 1280
+	var h := 150
+	var img := _img(w, h)
+	_sky(img, 52)
+	for y in range(48, h):
+		var t := float(y - 48) / float(h - 48)
+		_rect(img, 0, y, w, 1, Color8(86, 150, 206).lerp(Color8(74, 164, 204), t))
+	for i in range(160):
+		var wx := rng.randf_range(0, w)
+		var wy := rng.randf_range(54, 148)
+		_rect(img, int(wx), int(wy), rng.randi_range(6, 18), 1, Color(1, 1, 1, 0.35))
+	# far away enemy ships near the horizon
+	for sx in [120, 260, 980, 1110, 1200]:
+		_rect(img, sx, 46, 18, 4, Color8(90, 60, 40))
+		_rect(img, sx + 8, 34, 1, 12, Color8(70, 50, 34))
+		_rect(img, sx + 3, 35, 11, 8, Color8(196, 70, 60))
+	return img
+
+
+## Field for wall 5: the sea continues at the top (the flagship floats there), then the beach.
+func _beach() -> Image:
+	var w := 1280
+	var h := 400
+	var img := _img(w, h)
+	for y in range(h):
+		var t := float(y) / h
+		_rect(img, 0, y, w, 1, Color8(226, 206, 160).lerp(Color8(214, 194, 146), t))
+	_speckle(img, Rect2i(0, 0, w, h), 26000, 0.04)
+	# sea at the top, with a wavy shoreline and foam
+	for x in range(w):
+		var shore := 62 + int(sin(x * 0.025) * 3.0 + sin(x * 0.07) * 1.5)
+		for y in range(shore):
+			img.set_pixel(x, y, Color8(74, 164, 204).lerp(Color8(96, 190, 210), float(y) / 62.0))
+		_rect(img, x, shore, 1, 6, Color8(200, 186, 146))           # wet sand
+		_rect(img, x, shore - 2, 1, 3, Color(1, 1, 1, 0.9))          # foam
+	for i in range(70):
+		_rect(img, rng.randi_range(0, w - 20), rng.randi_range(4, 50), rng.randi_range(6, 18), 1, Color(1, 1, 1, 0.35))
+	for i in range(80):
+		_ellipse(img, rng.randf_range(0, w), rng.randf_range(80, h), rng.randf_range(12, 34), rng.randf_range(3, 7), Color8(204, 182, 134, 120))
+	for i in range(60):                         # shells
+		var c := Color8(250, 236, 226) if rng.randf() < 0.5 else Color8(240, 196, 186)
+		_ellipse(img, rng.randf_range(0, w), rng.randf_range(80, h), 2.5, 1.8, c)
+	for i in range(10):                         # driftwood
+		var dx := rng.randf_range(40, w - 80)
+		var dy := rng.randf_range(90, h - 20)
+		_line(img, dx, dy, dx + rng.randf_range(20, 50), dy + rng.randf_range(-6, 6), Color8(150, 116, 80), 3)
+	for i in range(60):                         # beach grass near our wall
+		var gx := rng.randi_range(2, w - 3)
+		var gy := rng.randi_range(h - 120, h - 2)
+		_rect(img, gx, gy - 4, 1, 4, Color8(130, 160, 80))
+		_rect(img, gx + 2, gy - 5, 1, 5, Color8(130, 160, 80))
+	return img
 
 ## Rocky edge on the side of the field. Stones bounce off it.
 ## Used on the left; the right side uses the same image flipped.
@@ -712,10 +821,9 @@ func _bust(img: Image, body: Color, skin: Color) -> void:
 	_ellipse(img, 48, 54, 19, 23, skin)
 
 
-func _portrait_king() -> Image:
+func _portrait_king(robe: Color = ROYAL, gray: Color = Color8(206, 206, 212)) -> Image:
 	var img := _img(96, 112)
-	var gray := Color8(206, 206, 212)
-	_bust(img, ROYAL, SKIN_LIGHT)
+	_bust(img, robe, SKIN_LIGHT)
 	_ellipse(img, 48, 86, 30, 9, Color8(246, 246, 240))           # ermine collar
 	for i in range(6):
 		_rect(img, 26 + i * 9, 84 + (i % 2) * 3, 2, 2, INK)
@@ -798,4 +906,237 @@ func _portrait_messenger() -> Image:
 	_ellipse(img, 70, 42, 2, 3.5, Color8(170, 214, 244))             # sweat
 	_ellipse(img, 25, 52, 2, 3.5, Color8(170, 214, 244))
 	_outline(img)
+	return img
+
+
+# ---------------------------------------------------------------- boss
+
+## The enemy flagship, side view (it sails left/right, its cannons face the shore).
+## Bow points RIGHT. Gun ports (cannon muzzles) at x = 40, 70, 100, 130, y = 74.
+func _ship() -> Image:
+	var img := _img(180, 100)
+	var hull := Color8(132, 86, 50)
+	var hull_dark := Color8(96, 60, 36)
+	var sail := Color8(206, 64, 54)
+	# masts and sails
+	_rect(img, 68, 6, 4, 58, hull_dark)
+	_rect(img, 114, 4, 4, 60, hull_dark)
+	for s in [[48, 14, 44, 34], [94, 10, 44, 38]]:
+		for y in range(s[1], s[1] + s[3]):
+			var bulge := int(sin(float(y - s[1]) / s[3] * PI) * 4.0)
+			_rect(img, s[0] - bulge, y, s[2] + bulge * 2, 1, sail)
+		_rect(img, s[0] - 2, s[1], s[2] + 4, 2, hull_dark)
+	_circle(img, 70, 31, 7, Color8(245, 236, 220))          # emblem on the sails
+	_circle(img, 116, 29, 7, Color8(245, 236, 220))
+	_rect(img, 68, 29, 5, 4, sail)
+	_rect(img, 114, 27, 5, 4, sail)
+	_rect(img, 118, 0, 12, 7, Color8(40, 36, 40))           # black flag
+	# stern castle (left) and bow (right)
+	_rect(img, 8, 46, 34, 18, hull)
+	_rect(img, 8, 46, 34, 3, hull.lightened(0.2))
+	_rect(img, 14, 52, 5, 5, Color8(250, 210, 120))
+	_rect(img, 26, 52, 5, 5, Color8(250, 210, 120))
+	# hull
+	for y in range(60, 94):
+		var t := float(y - 60) / 34.0
+		var left := int(lerpf(6, 30, t * t))
+		var right := int(lerpf(178, 150, t))
+		_rect(img, left, y, right - left, 1, hull if (y % 10) < 5 else hull.darkened(0.08))
+	_rect(img, 6, 60, 172, 3, hull.lightened(0.25))
+	_rect(img, 20, 68, 136, 13, Color8(150, 40, 40))         # red gun deck band
+	for px in [40, 70, 100, 130]:
+		_circle(img, px, 74, 5, Color8(40, 38, 42))
+		_circle(img, px, 74, 3, Color8(16, 14, 16))
+	_line(img, 166, 60, 179, 50, hull_dark, 3)               # bowsprit
+	for x in range(20, 160):                                 # foam at the waterline
+		_rect(img, x, 92 + int(sin(x * 0.4) * 1.5), 1, 2, Color(1, 1, 1, 0.9))
+	_outline(img)
+	return img
+
+
+## Iron cannonball.
+func _cannonball() -> Image:
+	var img := _img(24, 24)
+	_circle(img, 12, 12, 10.5, Color8(56, 56, 62))
+	_circle(img, 11, 11, 8, Color8(76, 76, 84))
+	_circle(img, 8, 8, 3, Color8(130, 130, 140))
+	_circle(img, 7, 7, 1.3, Color8(210, 210, 220))
+	_outline(img)
+	return img
+
+
+# ---------------------------------------------------------------- narrated story pictures (640x360, shown at 2x)
+
+func _paste(dst: Image, src: Image, x: int, y: int, scale: float = 1.0) -> void:
+	var s := src.duplicate() as Image
+	if scale != 1.0:
+		s.resize(int(s.get_width() * scale), int(s.get_height() * scale), Image.INTERPOLATE_NEAREST)
+	dst.blend_rect(s, Rect2i(0, 0, s.get_width(), s.get_height()), Vector2i(x, y))
+
+
+func _ring(img: Image, cx: float, cy: float, rx: float, ry: float, c: Color, broken: bool) -> void:
+	var steps := int(TAU * maxf(rx, ry))
+	for i in range(steps):
+		var a := TAU * i / steps
+		if broken and fmod(a * 3.0 + rx * 0.05, 1.0) < 0.35:
+			continue
+		var x := cx + cos(a) * rx
+		var y := cy + sin(a) * ry
+		_rect(img, int(x) - 2, int(y) - 2, 5, 5, c.darkened(0.35))
+		_rect(img, int(x) - 1, int(y) - 1, 3, 3, c)
+
+
+## The island seen from above: five rings of walls around the old town.
+func _story_map(fallen: bool) -> Image:
+	var w := 640
+	var h := 360
+	var img := _img(w, h)
+	for y in range(h):
+		_rect(img, 0, y, w, 1, Color8(84, 156, 210).lerp(Color8(110, 180, 222), float(y) / h))
+	for i in range(140):
+		_rect(img, rng.randi_range(0, w - 12), rng.randi_range(0, h - 1), rng.randi_range(4, 12), 1, Color(1, 1, 1, 0.3))
+	var cx := 320.0
+	var cy := 185.0
+	_ellipse(img, cx, cy, 268, 168, Color8(226, 206, 156))                  # beach
+	for i in range(30):                                                      # bumpy coast
+		var a := TAU * i / 30.0
+		_circle(img, cx + cos(a) * 262, cy + sin(a) * 162, rng.randf_range(14, 24), Color8(226, 206, 156))
+	_ellipse(img, cx, cy, 252, 152, Color8(132, 186, 92))                   # grass
+	_speckle(img, Rect2i(60, 30, 520, 320), 9000, 0.05)
+	for i in range(70):                                                      # little houses
+		var a := rng.randf_range(0, TAU)
+		var r := rng.randf_range(0.15, 0.9)
+		var hx := cx + cos(a) * 225 * r
+		var hy := cy + sin(a) * 135 * r
+		_rect(img, int(hx), int(hy), 6, 5, Color8(236, 226, 206))
+		_rect(img, int(hx) - 1, int(hy) - 3, 8, 3, Color8(196, 92, 70))
+	for k in range(5, 0, -1):                                                # five walls
+		var style: Dictionary = WALL_STYLES[k]
+		var c: Color = style["stone"]
+		var broken := fallen and k > 1
+		_ring(img, cx, cy, 30.0 + k * 42.0, 18.0 + k * 25.0, c, broken)
+		if broken:
+			for i in range(5):
+				var a := rng.randf_range(0, TAU)
+				var fx := cx + cos(a) * (30.0 + k * 42.0)
+				var fy := cy + sin(a) * (18.0 + k * 25.0)
+				_circle(img, fx, fy - 4, 4, Color8(250, 150, 50))
+				_circle(img, fx, fy - 10, 5, Color(0.4, 0.4, 0.42, 0.6))
+	if fallen:
+		_ring(img, cx, cy, 72, 43, Color8(255, 220, 110), false)            # the Last Wall still stands
+		for i in range(9):                                                   # enemy ships around the island
+			var a := TAU * i / 9.0 + 0.2
+			var sx := cx + cos(a) * 300
+			var sy := cy + sin(a) * 190
+			_rect(img, int(sx) - 8, int(sy), 16, 4, Color8(100, 66, 40))
+			_rect(img, int(sx) - 4, int(sy) - 10, 9, 9, Color8(206, 64, 54))
+	# the keep in the middle
+	_rect(img, int(cx) - 10, int(cy) - 14, 20, 18, Color8(236, 230, 214))
+	_rect(img, int(cx) - 12, int(cy) - 18, 6, 6, Color8(236, 230, 214))
+	_rect(img, int(cx) + 6, int(cy) - 18, 6, 6, Color8(236, 230, 214))
+	_rect(img, int(cx), int(cy) - 30, 1, 14, Color8(90, 70, 50))
+	_rect(img, int(cx) + 1, int(cy) - 30, 9, 6, ROYAL)
+	_outline(img)
+	return img
+
+
+## Five painted kings in the royal hall.
+func _story_kings() -> Image:
+	var img := _throne_room()
+	var robes := [ROYAL, Color8(120, 70, 160), Color8(60, 130, 90), Color8(170, 70, 60), Color8(50, 110, 160)]
+	var hairs := [Color8(214, 214, 220), Color8(150, 100, 60), Color8(80, 60, 50), Color8(230, 200, 120), Color8(190, 190, 196)]
+	_rect(img, 0, 30, 640, 230, Color(0.98, 0.95, 0.88, 0.85))
+	for i in range(5):
+		var x := 18 + i * 124
+		_rect(img, x - 6, 48, 116, 150, GOLD)
+		_rect(img, x - 2, 52, 108, 142, GOLD.darkened(0.25))
+		_rect(img, x, 54, 104, 138, Color8(236, 226, 200))
+		_paste(img, _portrait_king(robes[i], hairs[i]), x + 4, 66, 1.0)
+		_rect(img, x + 22, 204, 60, 12, GOLD)                                # name plate
+		_rect(img, x + 24, 206, 56, 8, GOLD.darkened(0.2))
+	return img
+
+
+## After the war: swords in the ground with helmets, the Last Wall far away.
+func _story_field() -> Image:
+	var w := 640
+	var h := 360
+	var img := _img(w, h)
+	for y in range(160):
+		_rect(img, 0, y, w, 1, Color8(150, 196, 236).lerp(Color8(236, 214, 180), float(y) / 160.0))
+	_rect(img, 0, 120, w, 26, Color8(226, 220, 206))                         # the Last Wall far away
+	for mx in range(0, w, 16):
+		_rect(img, mx, 114, 9, 7, Color8(226, 220, 206))
+	for y in range(146, h):
+		_rect(img, 0, y, w, 1, Color8(126, 176, 86).lerp(Color8(110, 160, 76), float(y - 146) / 214.0))
+	_speckle(img, Rect2i(0, 146, w, 214), 9000, 0.05)
+	for i in range(160):                                                     # little flowers
+		_circle(img, rng.randf_range(0, w), rng.randf_range(150, h), 1.5, Color8(250, 240, 120) if rng.randf() < 0.5 else Color8(250, 250, 250))
+	for row in range(5):                                                     # rows of swords, far to near
+		var y := 170 + row * 38
+		var s := 0.6 + row * 0.22
+		for i in range(8 - row):
+			var x := 40 + i * (560.0 / (8 - row)) + rng.randf_range(-14, 14) + row * 10
+			var blade := int(26 * s)
+			_rect(img, int(x), y - blade, maxi(2, int(3 * s)), blade, STEEL_LIGHT)
+			_rect(img, int(x - 6 * s), y - blade, int(15 * s), maxi(2, int(3 * s)), GOLD)
+			_ellipse(img, x + 1, y - blade - 6 * s, 9 * s, 7 * s, STEEL)        # helmet on the hilt
+			_rect(img, int(x - 8 * s), int(y - blade - 4 * s), int(18 * s), maxi(1, int(2 * s)), STEEL_DARK)
+	_outline(img)
+	return img
+
+
+## Watchmen's view from the Sea Wall: red sails everywhere.
+func _story_ships() -> Image:
+	var w := 640
+	var h := 360
+	var img := _img(w, h)
+	for y in range(130):
+		_rect(img, 0, y, w, 1, SKY_TOP.lerp(SKY_LOW, float(y) / 130.0))
+	for y in range(130, h):
+		_rect(img, 0, y, w, 1, Color8(86, 150, 206).lerp(Color8(70, 168, 204), float(y - 130) / 230.0))
+	for i in range(160):
+		_rect(img, rng.randi_range(0, w - 14), rng.randi_range(134, h - 1), rng.randi_range(5, 14), 1, Color(1, 1, 1, 0.3))
+	for i in range(26):                                                      # the fleet, far to near
+		var d := float(i) / 26.0
+		var s := 0.4 + d * 1.6
+		var sx := rng.randf_range(10, w - 40)
+		var sy := 136.0 + d * 150.0
+		_rect(img, int(sx), int(sy), int(30 * s), int(6 * s), Color8(110, 72, 44))
+		_rect(img, int(sx + 14 * s), int(sy - 22 * s), maxi(1, int(2 * s)), int(22 * s), Color8(80, 56, 36))
+		_rect(img, int(sx + 6 * s), int(sy - 20 * s), int(18 * s), int(14 * s), Color8(206, 64, 54))
+	var style: Dictionary = WALL_STYLES[5]                                     # the Sea Wall in front
+	_bricks(img, Rect2i(0, 312, w, 48), style["stone"], style["mortar"], 40, 14, 0.05)
+	for mx in range(0, w, 50):
+		_bricks(img, Rect2i(mx + 6, 296, 30, 18), style["stone"], style["mortar"], 15, 9, 0.05)
+	_outline(img)
+	return img
+
+
+## The king calls the hero: throne room, the king on his throne, the hero (from behind) before him.
+func _story_king_calls() -> Image:
+	var img := _throne_room()
+	_paste(img, _portrait_king(), 272, 98, 1.0)
+	_paste(img, _shield(), 272, 232, 1.1)       # hero (from behind) stands below the throne
+	_paste(img, _hero(), 276, 256, 1.1)
+	return img
+
+
+## The hero at the Last Wall, looking out at the enemy.
+func _story_hero() -> Image:
+	var img := _img(640, 360)
+	var top := _ruins(2)
+	top.resize(640, 75, Image.INTERPOLATE_NEAREST)
+	var ground := _ground()
+	ground.resize(640, 200, Image.INTERPOLATE_NEAREST)
+	var path := _path()
+	path.resize(640, 38, Image.INTERPOLATE_NEAREST)
+	var wall := _wall(0, 1)
+	wall.resize(640, 48, Image.INTERPOLATE_NEAREST)
+	_paste(img, top, 0, 0)
+	_paste(img, ground, 0, 75)
+	_paste(img, path, 0, 275)
+	_paste(img, wall, 0, 312)
+	_paste(img, _shield(), 276, 180)            # shield centered 36 px above the hero's center
+	_paste(img, _hero(), 280, 200)
 	return img

@@ -204,7 +204,31 @@ All values in `scripts/data/shop_data.gd`.
 ## 10. Tech rules
 
 - Renderer **Compatibility**. GDScript only. No file saves, no networking.
-- `GameState` is the only autoload (coins, upgrade levels, current wall, per-wall HP, signals). It owns the audio player as a child: `GameState.audio.play("name")`, `GameState.audio.start_music()` (called on the Play click), `GameState.audio.quit_game()` (stops sounds, then quits; use it instead of `get_tree().quit()`). M mutes.
+- `GameState` is the only autoload (coins, upgrade levels, current wall, per-wall HP, signals). It owns the audio player as a child: `GameState.audio.play("name")`, `GameState.audio.play_voice("narration_01")` (narrator lines; returns false if not recorded), `GameState.audio.quit_game()` (stops sounds, then quits; use it instead of `get_tree().quit()`). M mutes.
 - Sounds: `assets/audio/<name>.ogg` or `.wav` (.ogg wins), list and volumes in `scripts/data/audio_data.gd`. Placeholders are synthesized by `tools/make_placeholder_audio.gd`. Replace guide: `assets/README.md`.
 - Use signals between nodes (`wall_fallen`, `enemy_died`, `wave_cleared`, `coins_changed`).
 - Collision layers: 1 `shield`, 2 `hostile_stone`, 3 `returned_stone`, 4 `enemy`, 5 `wall`, 6 `world_edge`.
+
+---
+
+## 11. Final build changes (user request, after step 7)
+
+These replace the older rules above where they disagree.
+
+- **No background music.** Only sound effects and the narrator's voice.
+- **5 walls**, built by 5 kings (data in `scripts/data/level_data.gd`):
+
+| Wall | Name | King | Max HP | Enemies | Look |
+|---|---|---|---|---|---|
+| 1 | The Last Wall | Aldren | 300 | 3 Throwers | white stone |
+| 2 | Berin's Wall | Berin | 260 | 2 Throwers + 2 Slingers | sandstone |
+| 3 | Corwin's Wall | Corwin | 220 | 2 Throwers + 2 Slingers + 1 Catapult | red brick |
+| 4 | Doran's Wall | Doran | 190 | 2 of each type | mossy stone with ivy |
+| 5 | The Sea Wall | Edmund | 180 | **Boss: The Iron Flagship** | blue-grey sea stone |
+
+  Every wall has its own pictures (`wall_N_whole/cracked/broken`). The top of the screen shows the next wall out in ruins (`ruins_N`); on wall 5 it is the sea, and the field is a beach.
+- Only **3 regular enemy types** (Thrower, Slinger, Catapult) + the boss.
+- **Boss (wall 5, `scripts/boss.gd`, numbers in `EnemyData.BOSS` and `FxData`):** an enemy ship on the sea, side view, cannons facing the shore. It sails in (horn, shake, big name banner), then roams left/right. Before each volley it stops, glows, and red marks appear for every cannonball. Volleys are a "sweep" (balls land one after another, stepping sideways: you must move) or a "cluster" (close together: one block catches them all). At 2/3 and 1/3 HP it gets angrier (banner, more balls per volley, faster, smoke then fire). Boss HP bar replaces the enemy icons. On death: chain of explosions, it sinks, longer victory pause. Bounced cannonballs turn gold like stones.
+- **Pay to repair:** when the hero moves out to a fallen wall, a repair screen opens (from "Next Wall" or the shop's continue button). The wall gets a free patch (20%); each repair step adds 10% of max HP and costs coins (`REPAIR_COINS_PER_HP`). The player picks None / - / + / Max. The old shop "Repair" row is gone. Falling back to a wall that is still standing needs no repair.
+- **Narrated story** (`scripts/ui/story.gd`, text in `story_data.gd`): 7 pictures with a slow zoom and crossfade, subtitles in a parchment box, the narrator's recorded line per picture (`assets/audio/voice/narration_0N`). A slide moves on when its line ends (or after a reading time if not recorded). Click/Space = next, Skip story. End screens play `narration_win` / `narration_lose`. Recording script: `assets/audio/voice/NARRATION_SCRIPT.md`.
+- Balance (bot tests): a decent player wins all 5 walls in ~6 min; a casual player in ~8 min with about one fall-back. With full upgrades the boss fight lasts ~55-65 s.

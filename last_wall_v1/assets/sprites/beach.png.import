@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwvkj5rna6m4f"
-path="res://.godot/imported/wall_whole.png-500dcd52079563db0616a037fd2a6cd1.ctex"
+uid="uid://c2hfjacipm5w2"
+path="res://.godot/imported/beach.png-4c57bb3c48ce6a8f3019f05b4c746dcd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/wall_whole.png"
-dest_files=["res://.godot/imported/wall_whole.png-500dcd52079563db0616a037fd2a6cd1.ctex"]
+source_file="res://assets/sprites/beach.png"
+dest_files=["res://.godot/imported/beach.png-4c57bb3c48ce6a8f3019f05b4c746dcd.ctex"]
 
 [params]
 

@@ -68,5 +68,4 @@ func _ready() -> void:
 
 
 func _on_play() -> void:
-	GameState.audio.start_music()   # first click: browsers allow sound from now on
 	get_tree().change_scene_to_file("res://scenes/story.tscn")

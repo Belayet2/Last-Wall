@@ -12,6 +12,7 @@ const GameData = preload("res://scripts/data/game_data.gd")
 const FxData = preload("res://scripts/data/fx_data.gd")
 const UI = preload("res://scripts/ui/ui_style.gd")
 const ShopScript = preload("res://scripts/ui/shop.gd")
+const RepairScript = preload("res://scripts/ui/repair.gd")
 
 const MARGIN := 16.0
 
@@ -37,6 +38,13 @@ var _msg_title: Label
 var _msg_sub: Label
 var _msg_buttons: HBoxContainer
 var _shop: Control
+var _repair: Control
+var _enemy_panel: PanelContainer
+var _boss_bar: ProgressBar
+var _banner: VBoxContainer
+var _banner_title: Label
+var _banner_sub: Label
+var _banner_tween: Tween
 
 
 func _ready() -> void:
@@ -50,6 +58,7 @@ func _ready() -> void:
 	_build_enemy_panel()
 	_build_coin_panel()
 	_build_intro()
+	_build_banner()
 	_build_message()
 
 
@@ -120,12 +129,88 @@ func show_end(title: String, subtitle: String, buttons: Array) -> void:
 
 
 func open_shop(continue_text: String) -> void:
-	_msg_panel.visible = false
-	_dim.visible = false
+	_close_popups()
 	_shop = ShopScript.new()
 	_shop.setup(continue_text)
 	_shop.continue_pressed.connect(func() -> void: action_chosen.emit("next"))
 	_root.add_child(_shop)
+
+
+## Moving out to a fallen wall: choose how much to repair it (and pay).
+func open_repair(continue_text: String) -> void:
+	_close_popups()
+	_repair = RepairScript.new()
+	_repair.confirmed.connect(func(steps: int) -> void:
+		if GameState.repair_wall(steps) and steps > 0:
+			GameState.audio.play("repair")
+		action_chosen.emit("go"))
+	_repair.shop_pressed.connect(func() -> void: open_shop(continue_text))
+	_root.add_child(_repair)
+
+
+func _close_popups() -> void:
+	_msg_panel.visible = false
+	_dim.visible = false
+	for popup in [_shop, _repair]:
+		if is_instance_valid(popup):
+			popup.queue_free()
+	_shop = null
+	_repair = null
+
+
+## Boss fight: the enemy panel becomes the boss's name and a big health bar.
+func show_boss(boss_name: String, max_hp: int) -> void:
+	_enemy_row.visible = false
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	_enemy_panel.add_child(col)
+	col.add_child(UI.centered(UI.label(boss_name, 16, UI.ACCENT)))
+	_boss_bar = ProgressBar.new()
+	_boss_bar.custom_minimum_size = Vector2(380, 16)
+	_boss_bar.show_percentage = false
+	_boss_bar.max_value = max_hp
+	_boss_bar.value = max_hp
+	_boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = UI.HP_BG
+	bg.border_color = UI.BORDER
+	bg.set_border_width_all(1)
+	bg.set_corner_radius_all(5)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = UI.BOSS_BAR
+	fill.set_corner_radius_all(5)
+	_boss_bar.add_theme_stylebox_override("background", bg)
+	_boss_bar.add_theme_stylebox_override("fill", fill)
+	col.add_child(_boss_bar)
+	for notch in [0.33, 0.66]:                     # where the boss gets angrier
+		var n := ColorRect.new()
+		n.color = UI.INK
+		n.size = Vector2(2, 16)
+		n.position = Vector2(380 * notch, 0)
+		n.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_boss_bar.add_child(n)
+
+
+func set_boss_hp(hp: int, _max_hp: int) -> void:
+	if _boss_bar:
+		create_tween().tween_property(_boss_bar, "value", float(hp), 0.2)
+
+
+## Big announcement in the middle of the field (boss arrives, boss gets angry).
+func show_banner(title: String, subtitle: String) -> void:
+	_banner_title.text = title
+	_banner_sub.text = subtitle
+	_banner.visible = true
+	_banner.modulate.a = 0.0
+	_banner.scale = Vector2(1.3, 1.3)
+	if _banner_tween:
+		_banner_tween.kill()
+	_banner_tween = create_tween()
+	_banner_tween.set_parallel(true)
+	_banner_tween.tween_property(_banner, "modulate:a", 1.0, 0.2)
+	_banner_tween.tween_property(_banner, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_banner_tween.chain().tween_interval(1.8)
+	_banner_tween.chain().tween_property(_banner, "modulate:a", 0.0, 0.5)
 
 
 # ---------------------------------------------------------------- input
@@ -228,6 +313,7 @@ func _build_enemy_panel() -> void:
 	_enemy_row = HBoxContainer.new()
 	_enemy_row.add_theme_constant_override("separation", 6)
 	panel.add_child(_enemy_row)
+	_enemy_panel = panel
 
 
 func _build_coin_panel() -> void:
@@ -262,6 +348,21 @@ func _build_intro() -> void:
 	_intro.add_child(_intro_sub)
 	_intro_tip = UI.centered(UI.world_label("", 18))
 	_intro.add_child(_intro_tip)
+
+
+func _build_banner() -> void:
+	_banner = VBoxContainer.new()
+	_banner.position = Vector2(0, 250)
+	_banner.size = Vector2(GameData.SCREEN_WIDTH, 160)
+	_banner.pivot_offset = Vector2(GameData.SCREEN_WIDTH * 0.5, 60)
+	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.visible = false
+	_root.add_child(_banner)
+	_banner_title = UI.centered(UI.world_label("", 60))
+	_banner_title.add_theme_color_override("font_color", UI.BANNER)
+	_banner.add_child(_banner_title)
+	_banner_sub = UI.centered(UI.world_label("", 24))
+	_banner.add_child(_banner_sub)
 
 
 func _build_message() -> void:
