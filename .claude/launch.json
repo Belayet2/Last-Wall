@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "last-wall-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-C", "last_wall_web", "dev", "--port", "5173", "--strictPort"],
+      "port": 5173
+    }
+  ]
+}
