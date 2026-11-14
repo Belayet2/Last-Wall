@@ -1,5 +1,6 @@
 extends Area2D
-## A thrown stone. Hostile stones hurt the wall; returned (gold) stones hurt enemies.
+## A thrown stone. Hostile stones break the top brick of the wall where they land;
+## returned (gold) stones hurt enemies.
 
 const GameData = preload("res://scripts/data/game_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
@@ -10,7 +11,6 @@ const LAYER_SHIELD := 1
 const LAYER_HOSTILE := 2
 const LAYER_RETURNED := 4
 const LAYER_ENEMY := 8
-const LAYER_WALL := 16
 
 var velocity := Vector2.ZERO
 var returned := false
@@ -24,6 +24,7 @@ var _life := 0.0
 var _gone := false
 var _sprite: Sprite2D
 var _fx: Node
+var _wall: Node
 
 
 func setup(start: Vector2, start_velocity: Vector2, stone_diameter: float, damage_to_wall: int, damage_to_enemy: int) -> void:
@@ -38,7 +39,7 @@ func _ready() -> void:
 	add_to_group("stones")
 	add_to_group("threat")
 	collision_layer = LAYER_HOSTILE
-	collision_mask = LAYER_SHIELD | LAYER_WALL
+	collision_mask = LAYER_SHIELD
 	monitorable = false
 	var circle := CircleShape2D.new()
 	circle.radius = diameter * 0.5
@@ -49,6 +50,7 @@ func _ready() -> void:
 	add_child(_sprite)
 	area_entered.connect(_on_area_entered)
 	_fx = get_tree().get_first_node_in_group("fx")
+	_wall = get_tree().get_first_node_in_group("wall")
 
 
 func _physics_process(delta: float) -> void:
@@ -65,6 +67,14 @@ func _physics_process(delta: float) -> void:
 		velocity.x = -absf(velocity.x)
 		_puff(Vector2(GameData.FIELD_RIGHT, position.y), FxData.SMALL_DUST)
 		GameState.audio.play("tap")
+	if not returned and not _gone and is_instance_valid(_wall):
+		var col: int = _wall.hit_column(position, r)
+		if col >= 0:
+			_wall.damage(col, wall_damage, position)
+			GameState.audio.play("wall_hit")
+			_puff(position, FxData.DUST)
+			remove()
+			return
 	_life += delta
 	if _life > GameData.STONE_LIFETIME or position.y < -40.0 or position.y > 760.0:
 		remove()
@@ -80,11 +90,6 @@ func _on_area_entered(area) -> void:
 			remove()
 	elif area.is_in_group("shield"):
 		area.bounce_stone(self)
-	elif area.is_in_group("wall"):
-		area.take_damage(wall_damage, global_position)
-		GameState.audio.play("wall_hit")
-		_puff(global_position, FxData.DUST)
-		remove()
 
 
 ## Called by the shield. The stone now belongs to the player.

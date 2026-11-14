@@ -3,7 +3,8 @@
 # --- Screen shake (pixels; it fades out at SHAKE_DECAY pixels per second) ---
 const SHAKE_DECAY := 30.0
 const SHAKE_WALL_HIT := 5.0
-const SHAKE_WALL_CRACK := 12.0      # when the wall changes look (cracked / broken)
+const SHAKE_WALL_CRACK := 12.0      # a brick of the last layer breaks (the wall falls)
+const SHAKE_BRICK_BREAK := 7.0      # one of your bricks breaks
 const SHAKE_ENEMY_DOWN := 4.0
 
 # --- Hit-stop: the game almost freezes for a moment when an enemy falls ---
@@ -61,6 +62,13 @@ const WALL_RUBBLE := {
 	"speed_min": 60.0, "speed_max": 160.0, "gravity": Vector2(0, 400), "damping": 10.0,
 	"size_min": 3.0, "size_max": 6.0, "color": Color(0.62, 0.58, 0.52),
 	"rect": Vector2(600, 4),
+}
+## A brick breaks (its color is set from brick_data.gd).
+const BRICK_RUBBLE := {
+	"amount": 18, "lifetime": 0.6, "direction": Vector2(0, -1), "spread": 70.0,
+	"speed_min": 60.0, "speed_max": 150.0, "gravity": Vector2(0, 420), "damping": 10.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(0.7, 0.3, 0.22),
+	"rect": Vector2(26, 6),
 }
 ## Trail behind a returned (gold) stone.
 const TRAIL := {

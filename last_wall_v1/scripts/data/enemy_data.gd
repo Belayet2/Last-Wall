@@ -47,11 +47,14 @@ const MARKER_SCALE_MAX := 1.5
 ## "hand" = where the stone leaves from, relative to the enemy center.
 ## "windup_time" = how long the enemy telegraphs before throwing (the landing mark shows during it).
 ## "icon" = HUD icon for this enemy.
+## "aim_spread" = it aims at the wall up to this far left/right of where it stands
+##                (the build screen shows these spots in red).
 const TYPES := {
 	"thrower": {
 		"hp": 2,
 		"throw_interval": 3.0,
 		"stone_speed": 150.0,
+		"aim_spread": 330.0,
 		"wall_damage": 8,
 		"coins": 5,
 		"return_damage": 1,
@@ -67,6 +70,7 @@ const TYPES := {
 		"hp": 1,
 		"throw_interval": 2.2,
 		"stone_speed": 200.0,
+		"aim_spread": 400.0,
 		"wall_damage": 5,
 		"coins": 4,
 		"return_damage": 1,
@@ -82,6 +86,7 @@ const TYPES := {
 		"hp": 4,
 		"throw_interval": 5.0,
 		"stone_speed": 110.0,
+		"aim_spread": 240.0,
 		"wall_damage": 20,
 		"coins": 15,
 		"return_damage": 2,

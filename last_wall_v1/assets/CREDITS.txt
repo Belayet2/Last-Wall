@@ -1,7 +1,12 @@
 LAST WALL - credits
 
-Placeholder art: drawn by code (tools/make_placeholder_art.gd) for this project.
-Placeholder sounds and music: synthesized by code (tools/make_placeholder_audio.gd) for this project.
+Bricks (brick_*.png, foundation_*.png): cut from the "Brick Walls Vol.1", "Old Brick Vol.1"
+and "Painted Brick Vol.1" texture packs by Tempisq (game-ready textures, royalty-free,
+credit appreciated). Made into bricks by tools/make_brick_art.gd.
+The raw texture packs are not included in this project (their license does not allow sharing them).
+
+Other placeholder art: drawn by code (tools/make_placeholder_art.gd) for this project.
+Placeholder sounds: synthesized by code (tools/make_placeholder_audio.gd) for this project.
 
 When you add art or sounds from somewhere else, list each one here:
   file name  -  author  -  source link  -  license (for example CC0)

@@ -18,7 +18,12 @@ func _ready() -> void:
 	# living backdrop: the world, the wall, the hero (you can walk him around), enemies on the ruins
 	GameScript.build_world(self)
 	var wall := WallScript.new()
-	wall.setup(300, 300)
+	var layout := GameState.current_layout()          # the last layer, plus a few rows of bricks for show
+	for col in range(layout.size()):
+		var column: Array = layout[col]
+		for type_key in ["stone", "clay", "clay" if col % 3 != 1 else "marble"]:
+			column.append({"type": type_key, "hp": 1, "max": 1})
+	wall.setup(layout, "foundation_1")
 	add_child(wall)
 	add_child(HeroScript.new())
 	for x in [330.0, 640.0, 950.0]:

@@ -84,7 +84,10 @@ func _start_windup() -> void:
 	_winding = true
 	add_to_group("threat")
 	var margin := EnemyData.TARGET_EDGE_MARGIN
-	_target = Vector2(randf_range(GameData.FIELD_LEFT + margin, GameData.FIELD_RIGHT - margin), GameData.WALL_TOP + 10.0)
+	var spread: float = data["aim_spread"]
+	var lo := maxf(_home.x - spread, GameData.FIELD_LEFT + margin)
+	var hi := minf(_home.x + spread, GameData.FIELD_RIGHT - margin)
+	_target = Vector2(randf_range(lo, hi), GameData.WALL_TOP + 10.0)
 	var start := _throw_origin()
 	var t := (GameData.CATCH_Y - start.y) / (_target.y - start.y)
 	var stone_size: float = data["stone_size"]

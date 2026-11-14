@@ -1,22 +1,23 @@
 extends Node
-## Run-wide state: coins, upgrades, which wall we defend, and every wall's HP.
+## Run-wide state: coins, upgrades, bricks, which wall we defend, and every wall's bricks.
 ## The only autoload.
 
 signal coins_changed(coins: int)
+signal bricks_changed
 
 const ShopData = preload("res://scripts/data/shop_data.gd")
 const LevelData = preload("res://scripts/data/level_data.gd")
+const BrickData = preload("res://scripts/data/brick_data.gd")
 
 const AudioScript = preload("res://scripts/audio.gd")
 
-const FALLEN := -1   # wall_hp value for a wall the enemy holds
-
-var audio: AudioScript   # sound effects + music (child node, survives scene changes)
+var audio: AudioScript   # sound effects (child node, survives scene changes)
 
 var coins := 0
 var current_wall := 1
 var upgrade_levels: Dictionary = {}
-var wall_hp: Array[int] = []    # one entry per wall; FALLEN = held by the enemy
+var wall_layouts: Array = []    # one layout per wall (see "walls" below); [] = held by the enemy
+var bricks: Dictionary = {}     # brick type -> how many you have (not on a wall yet)
 
 # end-of-game info (shown on the win / lose screen)
 var last_result := ""           # "win" or "lose"
@@ -41,9 +42,11 @@ func reset() -> void:
 	upgrade_levels.clear()
 	for key in ShopData.UPGRADES:
 		upgrade_levels[key] = 0
-	wall_hp.clear()
+	wall_layouts.clear()
 	for i in range(wall_count()):
-		wall_hp.append(wall_max_hp(i + 1) if i == 0 else FALLEN)
+		wall_layouts.append([])
+	bricks = BrickData.START_BRICKS.duplicate()
+	bricks_changed.emit()
 	coins_changed.emit(coins)
 
 
@@ -55,32 +58,43 @@ func add_coins(amount: int) -> void:
 
 
 # ---------------------------------------------------------------- walls
+# Each wall is saved as a "layout": one Array per column, bottom brick first.
+# A brick is {"type": "foundation" / "clay" / ..., "hp": int, "max": int}.
+# An empty layout ([]) = the enemy holds that wall: you arrive to its last layer only.
 
 func wall_count() -> int:
 	return LevelData.WALLS.size()
-
-
-func wall_max_hp(number: int) -> int:
-	return LevelData.WALLS[number - 1]["max_hp"]
 
 
 func wall_title(number: int) -> String:
 	return LevelData.WALLS[number - 1]["title"]
 
 
-## Called when a wave starts. Returns the wall's starting HP.
-## (A fallen wall that was never repaired still gets the free patch.)
-func begin_wave() -> int:
-	var hp := wall_hp[current_wall - 1]
-	if hp == FALLEN:
-		hp = repair_base_hp()
-		wall_hp[current_wall - 1] = hp
-	return hp
+## The layout to fight on now: the saved one, or a fresh last layer (you just arrived).
+func current_layout() -> Array:
+	var saved: Array = wall_layouts[current_wall - 1]
+	if not saved.is_empty():
+		return saved.duplicate(true)
+	var hp: int = LevelData.WALLS[current_wall - 1]["foundation_hp"]
+	var fresh := []
+	for i in range(BrickData.COLUMNS):
+		fresh.append([{"type": "foundation", "hp": hp, "max": hp}])
+	return fresh
 
-## The wave on the current wall was cleared: heal it and pay the retake bonus.
-## Returns the bonus.
-func wave_cleared() -> int:
-	wall_hp[current_wall - 1] = wall_max_hp(current_wall)
+
+## True if the hero arrives at a wall the enemy held (only the last layer is left).
+func arriving_fresh() -> bool:
+	return wall_layouts[current_wall - 1].is_empty()
+
+
+## The wave on the current wall was cleared: every brick still standing is mended,
+## the wall is saved, and the retake bonus is paid. Returns the bonus.
+func wave_cleared(layout: Array) -> int:
+	var saved := layout.duplicate(true)
+	for column in saved:
+		for brick in column:
+			brick["hp"] = brick["max"]
+	wall_layouts[current_wall - 1] = saved
 	var bonus := ShopData.RETAKE_BONUS_PER_WALL * current_wall
 	add_coins(bonus)
 	return bonus
@@ -94,12 +108,54 @@ func advance() -> void:
 	current_wall = mini(current_wall + 1, wall_count())
 
 
-## The current wall fell. The hero falls back one wall (it keeps its HP).
+## The current wall fell (the enemy holds it again, its bricks are lost). The hero falls back one wall.
 func fall_back() -> void:
-	wall_hp[current_wall - 1] = FALLEN
+	wall_layouts[current_wall - 1] = []
 	current_wall = maxi(current_wall - 1, 1)
 	falls += 1
 
+
+# ---------------------------------------------------------------- bricks
+
+func brick_count(type_key: String) -> int:
+	return int(bricks.get(type_key, 0))
+
+
+func total_bricks() -> int:
+	var n := 0
+	for key in bricks:
+		n += int(bricks[key])
+	return n
+
+
+func brick_cost(type_key: String) -> int:
+	return BrickData.TYPES[type_key]["cost"]
+
+
+## Buys `count` bricks. Returns false if there are not enough coins.
+func buy_bricks(type_key: String, count: int) -> bool:
+	var cost := brick_cost(type_key) * count
+	if count <= 0 or coins < cost:
+		return false
+	bricks[type_key] = brick_count(type_key) + count
+	add_coins(-cost)
+	bricks_changed.emit()
+	return true
+
+
+## Takes one brick out of the stock (to lay it on the wall). Returns false if there is none.
+func use_brick(type_key: String) -> bool:
+	if brick_count(type_key) <= 0:
+		return false
+	bricks[type_key] = brick_count(type_key) - 1
+	bricks_changed.emit()
+	return true
+
+
+## Puts a brick back into the stock (taken off the wall while building).
+func return_brick(type_key: String) -> void:
+	bricks[type_key] = brick_count(type_key) + 1
+	bricks_changed.emit()
 
 # ---------------------------------------------------------------- upgrades
 
@@ -128,53 +184,4 @@ func buy_upgrade(key: String) -> bool:
 		return false
 	upgrade_levels[key] = int(upgrade_levels[key]) + 1
 	add_coins(-cost)
-	return true
-
-
-# ---------------------------------------------------------------- repairs
-# When the hero moves out to a fallen wall, he pays to repair it before the fight.
-# It always gets a free patch (FALLEN_WALL_FREE_HP); every repair "step" adds REPAIR_STEP of max HP.
-
-func needs_repair() -> bool:
-	return wall_hp[current_wall - 1] == FALLEN
-
-
-func repair_base_hp() -> int:
-	return ceili(wall_max_hp(current_wall) * ShopData.FALLEN_WALL_FREE_HP)
-
-
-func repair_step_hp() -> int:
-	return ceili(wall_max_hp(current_wall) * ShopData.REPAIR_STEP)
-
-
-func repair_step_cost() -> int:
-	return ceili(repair_step_hp() * ShopData.REPAIR_COINS_PER_HP)
-
-
-## Most steps that make sense (up to full HP).
-func repair_max_steps() -> int:
-	return ceili(float(wall_max_hp(current_wall) - repair_base_hp()) / repair_step_hp())
-
-
-## Most steps the player can pay for right now.
-func repair_affordable_steps() -> int:
-	return mini(repair_max_steps(), floori(float(coins) / repair_step_cost()))
-
-
-func repair_hp_for(steps: int) -> int:
-	return mini(repair_base_hp() + steps * repair_step_hp(), wall_max_hp(current_wall))
-
-
-func repair_cost_for(steps: int) -> int:
-	return steps * repair_step_cost()
-
-
-## Pays and sets the wall's starting HP. Returns false if there are not enough coins.
-func repair_wall(steps: int) -> bool:
-	var cost := repair_cost_for(steps)
-	if steps < 0 or cost > coins:
-		return false
-	wall_hp[current_wall - 1] = repair_hp_for(steps)
-	if cost > 0:
-		add_coins(-cost)
 	return true

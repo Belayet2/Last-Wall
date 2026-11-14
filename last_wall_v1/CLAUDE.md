@@ -226,9 +226,26 @@ These replace the older rules above where they disagree.
 | 4 | Doran's Wall | Doran | 190 | 2 of each type | mossy stone with ivy |
 | 5 | The Sea Wall | Edmund | 180 | **Boss: The Iron Flagship** | blue-grey sea stone |
 
-  Every wall has its own pictures (`wall_N_whole/cracked/broken`). The top of the screen shows the next wall out in ruins (`ruins_N`); on wall 5 it is the sea, and the field is a beach.
+  Every wall has its own last-layer brick (`foundation_N`, see section 12). The top of the screen shows the next wall out in ruins (`ruins_N`); on wall 5 it is the sea, and the field is a beach.
 - Only **3 regular enemy types** (Thrower, Slinger, Catapult) + the boss.
 - **Boss (wall 5, `scripts/boss.gd`, numbers in `EnemyData.BOSS` and `FxData`):** an enemy ship on the sea, side view, cannons facing the shore. It sails in (horn, shake, big name banner), then roams left/right. Before each volley it stops, glows, and red marks appear for every cannonball. Volleys are a "sweep" (balls land one after another, stepping sideways: you must move) or a "cluster" (close together: one block catches them all). At 2/3 and 1/3 HP it gets angrier (banner, more balls per volley, faster, smoke then fire). Boss HP bar replaces the enemy icons. On death: chain of explosions, it sinks, longer victory pause. Bounced cannonballs turn gold like stones.
-- **Pay to repair:** when the hero moves out to a fallen wall, a repair screen opens (from "Next Wall" or the shop's continue button). The wall gets a free patch (20%); each repair step adds 10% of max HP and costs coins (`REPAIR_COINS_PER_HP`). The player picks None / - / + / Max. The old shop "Repair" row is gone. Falling back to a wall that is still standing needs no repair.
+- ~~Pay to repair~~: replaced by the brick wall (section 12).
 - **Story in text, no voice** (`scripts/ui/story.gd`, text in `story_data.gd`): 7 pictures with a slow zoom and crossfade. A narrator's text types out in a large, solid parchment box at the bottom, then waits for click / Space (first click shows the whole line). Skip story button. End screens show a closing narrator line. No voice files are used.
 - Balance (bot tests): a decent player wins all 5 walls in ~6 min; a casual player in ~8 min with about one fall-back. With full upgrades the boss fight lasts ~55-65 s.
+
+---
+
+## 12. Brick wall (user request, replaces the HP wall and pay-to-repair)
+
+The wall works like a brick-breaker game turned upside down (`scripts/wall.gd`, numbers in `scripts/data/brick_data.gd`).
+
+- The wall is a grid: **18 columns x 4 rows** of 64 x 22 bricks (x 64..1216, bottom at y 720), with an old-stone tower at each end.
+- **Bottom row = the "last layer"** (`foundation_N` picture, `foundation_hp` per wall in `level_data.gd`: 40 / 34 / 30 / 26 / 24). It is always there when you arrive at a wall. **If ANY last-layer brick breaks, the wall falls** (fall back; Game Over on Wall 1).
+- A hostile stone that gets past the shield hits the **top brick of its column** (each column is a stack). Damage = the stone's `wall_damage`. Bricks show cracks below 67% / 34% HP and break with rubble.
+- **Bricks you buy** (shop, left half): Mud 8 HP / 2 coins, Clay 16 / 4, Stone 30 / 7, Marble 48 / 11. Unused bricks are kept (`GameState.bricks`). Start: 12 clay bricks (the king's gift).
+- **Build screen before every fight** (`scripts/ui/build.gd`): enemies wait. Pick a brick (buttons or keys 1-4), click a column to lay it on top (max 3 on the last layer), right-click takes the top brick back into stock. Auto-build (strongest bricks where enemies aim most), Clear, Shop, Fight!. Red strips over the wall show where enemies aim; numbers show each column's total HP.
+- **Enemies aim at the wall in front of them** (`aim_spread` in `enemy_data.gd`), so where you build matters. The boss fires all along the wall.
+- **Wave cleared:** surviving bricks are mended to full and the wall is saved (`GameState.wall_layouts`). Moving out to the next wall: only its last layer is left, you build on it. **Wall falls:** its bricks are lost (it will be a fresh last layer next time); the previous wall still has its saved bricks.
+- HUD top-left: "Last layer" bar = the weakest last-layer brick.
+- Brick sprites are cut from the user's texture packs (Tempisq) by `tools/make_brick_art.gd -- --src=<folder>`; the raw packs stay outside the repo (license: no redistribution of the textures).
+- Balance (bot tests): good player ~3.5 min, no falls; sloppy ~6 min, 1 fall; casual 7-10 min, 0-1 falls (usually on Wall 4's two catapults). Idle hero: Wall 1 falls after ~100 s.

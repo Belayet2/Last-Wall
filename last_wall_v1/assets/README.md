@@ -23,7 +23,10 @@ Your picture can be **any size**. The game scales it to the "shown at" size belo
 | `enemy_slinger.png` / `_windup.png` | 40 × 48 | Slinger standing / spinning the sling |
 | `enemy_catapult.png` / `_windup.png` | 80 × 64 | Catapult just fired (arm up) / loaded (arm back) |
 | `ship.png` | 252 × 140 | The boss: the enemy flagship, **side view, bow pointing right**. Its cannon muzzles must stay at the same spots (see below) |
-| `wall_1_whole.png` … `wall_5_broken.png` | 1280 × 95 | Our wall at the bottom. **5 walls × 3 looks** (whole, cracked, broken). Keep the door in the middle |
+| `foundation_1.png` … `foundation_5.png` | 64 × 22 | One brick of each wall's **last layer** (the bottom row that is already there when you arrive). Also used for the towers at both ends |
+| `brick_mud.png`, `brick_clay.png`, `brick_stone.png`, `brick_marble.png` | 64 × 22 | The 4 bricks you buy in the shop and lay on the wall |
+| `brick_cracks_1.png`, `brick_cracks_2.png` | 64 × 22 | Cracks drawn **on top of** a damaged brick (transparent picture, only the crack lines) |
+| `brick_slot.png` | 64 × 22 | Build screen: dashed outline where the next brick goes |
 | `ruins_1.png` … `ruins_4.png` | 1280 × 150 | The top of the screen on walls 1–4: sky and the **next** wall out, captured and in ruins |
 | `sea.png` | 1280 × 150 | The top of the screen on wall 5: sky, sea and the far-away fleet |
 | `ground.png` | 1280 × 400 | The field on walls 1–4 |
@@ -31,7 +34,7 @@ Your picture can be **any size**. The game scales it to the "shown at" size belo
 | `path.png` | 1280 × 75 | The dirt path the hero walks on |
 | `edge_rocks.png` | 40 × 475 | Rocks at the left edge (the right edge uses it mirrored) |
 | `marker.png` | 56 × 18 | Red landing mark on the path |
-| `icon_wall.png`, `icon_coin.png` | 28 × 28, 26 × 26 | HUD icons |
+| `icon_wall.png`, `icon_coin.png`, `icon_brick.png` | 28 × 28, 26 × 26, 26 × 26 | HUD icons |
 | `icon_enemy.png`, `icon_slinger.png`, `icon_catapult.png` | 26 × 26 (catapult 30 × 26) | HUD enemy icons |
 | `story_map.png`, `story_kings.png`, `story_field.png`, `story_ships.png`, `story_map_fallen.png`, `story_king_calls.png`, `story_hero.png` | 1280 × 720 | The 7 story pictures, in order |
 | `story_throne_room.png` | 1280 × 720 | End screen background |
@@ -40,6 +43,14 @@ Your picture can be **any size**. The game scales it to the "shown at" size belo
 **Boss ship cannons:** the cannonballs come out of 4 gun ports. Their positions are set in `scripts/data/enemy_data.gd` (`BOSS` → `"ports"`, in pixels of a 180 × 100 image). If your ship picture has its cannons somewhere else, change those numbers.
 
 To change a "shown at" size, edit `scripts/data/art_data.gd`.
+
+**Bricks from texture packs:** the bricks were cut out of the brick texture packs (Tempisq "Brick Walls", "Old Brick", "Painted Brick") with a tool. To make them again, or from other textures, unzip the packs into one folder and run:
+
+```
+godot --headless --path . --script res://tools/make_brick_art.gd -- --src=C:/path/to/unzipped/packs
+```
+
+Which texture becomes which brick is the `SOURCES` list at the top of `tools/make_brick_art.gd`. Brick HP and prices are in `scripts/data/brick_data.gd`.
 
 To go back to the placeholder art, delete your file and run:
 
@@ -51,7 +62,7 @@ godot --headless --path . --script res://tools/make_placeholder_art.gd
 
 ## Making your own art: the easy way
 
-1. **Paint over the placeholder.** Open the existing PNG (for example `assets/sprites/hero.png`) in your art program and draw your version on top of it, at the **same size**. That keeps everything lined up: the hero's feet, the shield above his head, the door in the middle of the wall, the ship's cannons.
+1. **Paint over the placeholder.** Open the existing PNG (for example `assets/sprites/hero.png`) in your art program and draw your version on top of it, at the **same size**. That keeps everything lined up: the hero's feet, the shield above his head, the bricks fitting edge to edge, the ship's cannons.
 2. **Save as PNG with transparency** (no white box around characters).
 3. **Save over the old file** with the same name, then switch back to Godot and press **F5**.
 4. **Save a backup first.** Before replacing art, commit in git (or copy the `assets/sprites` folder) so you can always go back.
@@ -66,7 +77,7 @@ Free pixel-art tools: **Aseprite** (paid, best), **LibreSprite** (free), **Pixel
 | `enemy_*_windup.png` | The stone in the raised hand. If your hand is somewhere else, change `"hand"` for that enemy in `scripts/data/enemy_data.gd` (pixels from the picture's center). |
 | `enemy_catapult_windup.png` | The stone leaves from the top of the arm (`"hand"` in `enemy_data.gd`). |
 | `ship.png` | **Bow pointing right**, cannon holes at the 4 `"ports"` positions in `enemy_data.gd` (pixels in a 180 × 100 picture). |
-| `wall_N_*.png` | Full width, door in the middle, top edge = top of the picture. |
+| `brick_*.png`, `foundation_N.png` | Fill the whole 64 × 22 picture: bricks sit edge to edge. A dark 1-px outline keeps them apart. |
 | `ruins_N.png`, `sea.png` | Enemies stand on the bottom ~15 px; the top ~60 px is sky (the HUD panels sit there). |
 | `beach.png` | The ship floats on the water at the top (~60 px of sea), then sand. |
 
@@ -94,7 +105,7 @@ The 7 story pictures (`story_*.png`) are drawn at 640 × 360 and shown at 1280 �
 | `coin` | Coins from an enemy |
 | `throw` | An enemy throws |
 | `tap` | A stone bounces off the side rocks |
-| `click` / `buy` / `repair` | Any button / buying in the shop / repairing a wall |
+| `click` / `buy` / `repair` | Any button / buying in the shop / laying a brick on the wall |
 | `horn` | A wave starts |
 | `wall_held` / `wall_fell` | Wave cleared / your wall fell |
 | `victory` / `defeat` | End screens |

@@ -1,12 +1,8 @@
-## Coins, shop and repairs. Tune freely.
+## Coins and shop. Tune freely. (Brick prices are in brick_data.gd.)
 
 const START_COINS := 0
 const RETAKE_BONUS_PER_WALL := 40   # bonus = this * wall number, paid every time a wave is cleared
-
-# --- Repairing a retaken wall (you pay before you fight on it) ---
-const FALLEN_WALL_FREE_HP := 0.2    # your men patch a retaken wall to 20% for free (so you never start at 0)
-const REPAIR_STEP := 0.1            # each repair step adds 10% of the wall's max HP
-const REPAIR_COINS_PER_HP := 0.3    # price: a step that adds 26 HP costs ceil(26 * 0.3) = 8 coins
+const BRICK_BUY_MANY := 5           # the shop's second buy button buys this many bricks
 
 ## "costs" has one entry per level, so its length is the max level.
 const UPGRADES := {

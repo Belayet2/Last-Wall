@@ -50,10 +50,7 @@ func _init() -> void:
 	_save("enemy_slinger_windup", _slinger.bind(true))
 	_save("enemy_catapult", _catapult.bind(false))
 	_save("enemy_catapult_windup", _catapult.bind(true))
-	for n in range(1, 6):
-		_save("wall_%d_whole" % n, _wall.bind(0, n))
-		_save("wall_%d_cracked" % n, _wall.bind(1, n))
-		_save("wall_%d_broken" % n, _wall.bind(2, n))
+	# (the wall's bricks are made from texture packs by tools/make_brick_art.gd)
 	for n in range(1, 5):
 		_save("ruins_%d" % n, _ruins.bind(n + 1))
 	_save("sea", _sea)

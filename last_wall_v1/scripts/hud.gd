@@ -1,18 +1,19 @@
 extends CanvasLayer
 ## In-game HUD, drawn over the world (light parchment panels):
-##   top-left   = wall number, wall name and HP bar
+##   top-left   = wall number, wall name and the "last layer" bar (its weakest brick)
 ##   top-middle = one helmet per enemy (it grays out when that enemy falls)
 ##   top-right  = coins
-## Plus the wave intro title, the pause screen, the end-of-wave choice and the shop.
+## Plus the wave intro title, the pause screen, the end-of-wave choice, the shop and the build screen.
 
-## Emitted when the player picks a button: "restart", "next" (start next wave), "shop".
+## Emitted when the player picks a button: "restart", "next" (go to the next wave), "shop",
+## "build" (back to the build screen), "fight" (building done, start the wave), "menu".
 signal action_chosen(action: String)
 
 const GameData = preload("res://scripts/data/game_data.gd")
 const FxData = preload("res://scripts/data/fx_data.gd")
 const UI = preload("res://scripts/ui/ui_style.gd")
 const ShopScript = preload("res://scripts/ui/shop.gd")
-const RepairScript = preload("res://scripts/ui/repair.gd")
+const BuildScript = preload("res://scripts/ui/build.gd")
 
 const MARGIN := 16.0
 
@@ -38,7 +39,7 @@ var _msg_title: Label
 var _msg_sub: Label
 var _msg_buttons: HBoxContainer
 var _shop: Control
-var _repair: Control
+var _build: Control
 var _enemy_panel: PanelContainer
 var _boss_bar: ProgressBar
 var _banner: VBoxContainer
@@ -128,34 +129,41 @@ func show_end(title: String, subtitle: String, buttons: Array) -> void:
 	_show_message(title, subtitle, buttons)
 
 
-func open_shop(continue_text: String) -> void:
+## The shop. Its continue button sends `action` ("next" after a wave, "build" from the build screen).
+func open_shop(continue_text: String, action: String = "next") -> void:
 	_close_popups()
 	_shop = ShopScript.new()
 	_shop.setup(continue_text)
-	_shop.continue_pressed.connect(func() -> void: action_chosen.emit("next"))
-	_root.add_child(_shop)
+	_shop.continue_pressed.connect(func() -> void: action_chosen.emit(action))
+	_add_popup(_shop)
 
 
-## Moving out to a fallen wall: choose how much to repair it (and pay).
-func open_repair(continue_text: String) -> void:
+## Before the fight: lay bricks on the wall.
+func open_build(wall: Node2D, danger: Array, intro: String) -> void:
 	_close_popups()
-	_repair = RepairScript.new()
-	_repair.confirmed.connect(func(steps: int) -> void:
-		if GameState.repair_wall(steps) and steps > 0:
-			GameState.audio.play("repair")
-		action_chosen.emit("go"))
-	_repair.shop_pressed.connect(func() -> void: open_shop(continue_text))
-	_root.add_child(_repair)
+	_build = BuildScript.new()
+	_build.setup(wall, danger, intro)
+	_build.fight_pressed.connect(func() -> void:
+		_close_popups()
+		action_chosen.emit("fight"))
+	_build.shop_pressed.connect(func() -> void: open_shop("Back to Building", "build"))
+	_add_popup(_build)
+
+
+## Popups go under the pause / message layer, so the pause menu is always on top.
+func _add_popup(popup: Control) -> void:
+	_root.add_child(popup)
+	_root.move_child(popup, _dim.get_index())
 
 
 func _close_popups() -> void:
 	_msg_panel.visible = false
 	_dim.visible = false
-	for popup in [_shop, _repair]:
+	for popup in [_shop, _build]:
 		if is_instance_valid(popup):
 			popup.queue_free()
 	_shop = null
-	_repair = null
+	_build = null
 
 
 ## Boss fight: the enemy panel becomes the boss's name and a big health bar.
@@ -280,8 +288,9 @@ func _build_wall_panel() -> void:
 	var bar_row := HBoxContainer.new()
 	bar_row.add_theme_constant_override("separation", 8)
 	col.add_child(bar_row)
+	bar_row.add_child(UI.label("Last layer", 14, UI.INK_SOFT))
 	_hp_bar = ProgressBar.new()
-	_hp_bar.custom_minimum_size = Vector2(170, 14)
+	_hp_bar.custom_minimum_size = Vector2(120, 14)
 	_hp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_hp_bar.show_percentage = false
 	_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -297,7 +306,7 @@ func _build_wall_panel() -> void:
 	_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
 	bar_row.add_child(_hp_bar)
 	_hp_label = UI.label("0 / 0", 14, UI.INK_SOFT)
-	_hp_label.custom_minimum_size = Vector2(72, 0)
+	_hp_label.custom_minimum_size = Vector2(60, 0)
 	bar_row.add_child(_hp_label)
 
 
