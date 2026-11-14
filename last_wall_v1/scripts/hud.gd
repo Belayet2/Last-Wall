@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## In-game HUD, drawn over the world (light parchment panels):
-##   top-left   = wall number, wall name and the "last layer" bar (its weakest brick)
+##   top-left   = wall number and wall name (no HP bar: the bricks' cracks show the damage)
 ##   top-middle = one helmet per enemy (it grays out when that enemy falls)
 ##   top-right  = coins
 ## Plus the wave intro title, the pause screen, the end-of-wave choice, the shop and the build screen.
@@ -23,9 +23,6 @@ var _root: Control
 var _coins := 0
 var _wall_number: Label
 var _wall_title: Label
-var _hp_bar: ProgressBar
-var _hp_fill: StyleBoxFlat
-var _hp_label: Label
 var _coins_label: Label
 var _coin_icon: TextureRect
 var _enemy_row: HBoxContainer
@@ -69,14 +66,6 @@ func _ready() -> void:
 func setup_wall(number: int, title: String) -> void:
 	_wall_number.text = "WALL %d" % number
 	_wall_title.text = title
-
-
-func set_wall_hp(hp: int, max_hp: int) -> void:
-	_hp_bar.max_value = max_hp
-	_hp_bar.value = hp
-	_hp_label.text = "%d / %d" % [hp, max_hp]
-	var ratio := float(hp) / float(max_hp)
-	_hp_fill.bg_color = UI.HP_GOOD if ratio > 0.6 else (UI.HP_MID if ratio > 0.3 else UI.HP_LOW)
 
 
 func set_coins(coins: int) -> void:
@@ -287,29 +276,6 @@ func _build_wall_panel() -> void:
 	names.add_child(_wall_number)
 	_wall_title = UI.label("", 16)
 	names.add_child(_wall_title)
-	var bar_row := HBoxContainer.new()
-	bar_row.add_theme_constant_override("separation", 8)
-	col.add_child(bar_row)
-	bar_row.add_child(UI.label("Last layer", 14, UI.INK_SOFT))
-	_hp_bar = ProgressBar.new()
-	_hp_bar.custom_minimum_size = Vector2(120, 14)
-	_hp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_hp_bar.show_percentage = false
-	_hp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = UI.HP_BG
-	bg.border_color = UI.BORDER
-	bg.set_border_width_all(1)
-	bg.set_corner_radius_all(5)
-	_hp_fill = StyleBoxFlat.new()
-	_hp_fill.bg_color = UI.HP_GOOD
-	_hp_fill.set_corner_radius_all(5)
-	_hp_bar.add_theme_stylebox_override("background", bg)
-	_hp_bar.add_theme_stylebox_override("fill", _hp_fill)
-	bar_row.add_child(_hp_bar)
-	_hp_label = UI.label("0 / 0", 14, UI.INK_SOFT)
-	_hp_label.custom_minimum_size = Vector2(60, 0)
-	bar_row.add_child(_hp_label)
 
 
 func _build_enemy_panel() -> void:

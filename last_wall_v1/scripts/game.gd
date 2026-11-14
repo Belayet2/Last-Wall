@@ -51,7 +51,6 @@ func _ready() -> void:
 	_wall = WallScript.new()
 	_wall.setup(GameState.current_layout(), _level["foundation"])
 	add_child(_wall)
-	_wall.foundation_changed.connect(_on_foundation_changed)
 	_wall.wall_fallen.connect(_on_wall_fallen)
 
 	_hero = HeroScript.new()
@@ -66,8 +65,6 @@ func _ready() -> void:
 	add_child(_hud)
 	_hud.action_chosen.connect(_on_action)
 	_hud.setup_wall(number, _level["title"])
-	var weakest := _wall.weakest_foundation()
-	_hud.set_wall_hp(weakest.x, weakest.y)
 	_hud.set_coins(GameState.coins)
 	GameState.coins_changed.connect(_hud.set_coins)
 
@@ -276,10 +273,6 @@ func _on_wall_fallen() -> void:
 	_end("Wall %d Fell!" % lost,
 		"A hole in the last layer! Bounce back to Wall %d and hold it." % back,
 		[["Shop", "shop", false], ["Fight", "next", true]])
-
-
-func _on_foundation_changed(hp: int, max_hp: int) -> void:
-	_hud.set_wall_hp(hp, max_hp)
 
 
 func _end(title: String, subtitle: String, buttons: Array) -> void:

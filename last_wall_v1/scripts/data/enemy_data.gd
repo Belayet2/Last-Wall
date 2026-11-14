@@ -10,7 +10,7 @@ const HITBOX_SCALE := 1.3           # enemies are easier to hit than they look
 ## It gets angrier at 2/3 and 1/3 HP (more cannonballs per volley, faster sailing).
 const BOSS := {
 	"name": "The Iron Flagship",
-	"hp": 60,
+	"hp": 70,
 	"coins": 100,
 	"y": 134.0,                       # center of the ship on screen (it floats where the sea meets the field)
 	"hitbox": Vector2(230, 90),
@@ -21,7 +21,7 @@ const BOSS := {
 	"ball_art": "cannonball",
 	"ball_size": 22.0,                # the ball picture is 11 x 11, drawn twice as big
 	"ball_speed": 175.0,
-	"wall_damage": 12,
+	"wall_damage": 13,
 	"return_damage": 1,
 	"windup": 1.0,                    # the ship glows this long before firing
 	"volley_gap": 0.7,                # seconds between the cannons of one volley
@@ -51,7 +51,7 @@ const TYPES := {
 	## 0 idle, 1 squashed, 2-7 fire + smoke. In "anim", points are pixels in ONE frame, cannon pointing right:
 	## "center" = middle of the cannon, "axle" = wheel axle (it tilts around it), "muzzle" = where the ball leaves.
 	"cannon": {
-		"hp": 2,
+		"hp": 3,
 		"throw_interval": 3.0,
 		"stone_speed": 150.0,
 		"aim_spread": 330.0,
@@ -74,7 +74,7 @@ const TYPES := {
 		"throw_interval": 2.2,
 		"stone_speed": 200.0,
 		"aim_spread": 400.0,
-		"wall_damage": 5,
+		"wall_damage": 6,
 		"coins": 4,
 		"return_damage": 1,
 		"stone_size": 15.0,
