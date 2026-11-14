@@ -24,7 +24,7 @@ const DANGER_ALPHA_MAX := 0.85      # build screen: red strip over the columns e
 const START_BRICKS := {"clay": 12}
 
 ## Bricks you can buy. "hp" = how much damage it takes before it breaks.
-## A thrower's stone does 8, a slinger's 5, a catapult boulder 20, a cannonball 12.
+## A cannon's ball does 8, a slinger's stone 5, a catapult boulder 20, the flagship's cannonball 12.
 const ORDER := ["mud", "clay", "stone", "marble"]
 const TYPES := {
 	"mud": {"name": "Mud Brick", "desc": "Cheap, but one stone breaks it", "hp": 8, "cost": 2,

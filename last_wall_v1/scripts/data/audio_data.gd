@@ -33,4 +33,10 @@ const SOUNDS := {
 	"ship_hit": -1.0,
 	"explosion": 0.0,
 	"boss_horn": 0.0,
+	"small_cannon": -9.0,
+}
+
+## Sounds that reuse another sound's file (name -> file name).
+const ALIASES := {
+	"small_cannon": "cannon",
 }

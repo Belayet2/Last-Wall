@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cc3jnx82m77j"
-path="res://.godot/imported/enemy_thrower_windup.png-b29e641594af252b07d523b2396a7bf8.ctex"
+uid="uid://cavf2ylwyp5q8"
+path="res://.godot/imported/enemy_cannon.png-5bfad261e68bfcdf4e5388a8d5d9e132.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemy_thrower_windup.png"
-dest_files=["res://.godot/imported/enemy_thrower_windup.png-b29e641594af252b07d523b2396a7bf8.ctex"]
+source_file="res://assets/sprites/enemy_cannon.png"
+dest_files=["res://.godot/imported/enemy_cannon.png-5bfad261e68bfcdf4e5388a8d5d9e132.ctex"]
 
 [params]
 

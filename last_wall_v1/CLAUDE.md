@@ -227,7 +227,7 @@ These replace the older rules above where they disagree.
 | 5 | The Sea Wall | Edmund | 180 | **Boss: The Iron Flagship** | blue-grey sea stone |
 
   Every wall has its own last-layer brick (`foundation_N`, see section 12). The top of the screen shows the next wall out in ruins (`ruins_N`); on wall 5 it is the sea, and the field is a beach.
-- Only **3 regular enemy types** (Thrower, Slinger, Catapult) + the boss.
+- Only **3 regular enemy types** (Cannon (was Thrower, see section 13), Slinger, Catapult) + the boss.
 - **Boss (wall 5, `scripts/boss.gd`, numbers in `EnemyData.BOSS` and `FxData`):** an enemy ship on the sea, side view, cannons facing the shore. It sails in (horn, shake, big name banner), then roams left/right. Before each volley it stops, glows, and red marks appear for every cannonball. Volleys are a "sweep" (balls land one after another, stepping sideways: you must move) or a "cluster" (close together: one block catches them all). At 2/3 and 1/3 HP it gets angrier (banner, more balls per volley, faster, smoke then fire). Boss HP bar replaces the enemy icons. On death: chain of explosions, it sinks, longer victory pause. Bounced cannonballs turn gold like stones.
 - ~~Pay to repair~~: replaced by the brick wall (section 12).
 - **Story in text, no voice** (`scripts/ui/story.gd`, text in `story_data.gd`): 7 pictures with a slow zoom and crossfade. A narrator's text types out in a large, solid parchment box at the bottom, then waits for click / Space (first click shows the whole line). Skip story button. End screens show a closing narrator line. No voice files are used.
@@ -249,3 +249,13 @@ The wall works like a brick-breaker game turned upside down (`scripts/wall.gd`, 
 - HUD top-left: "Last layer" bar = the weakest last-layer brick.
 - Brick sprites are cut from the user's texture packs (Tempisq) by `tools/make_brick_art.gd -- --src=<folder>`; the raw packs stay outside the repo (license: no redistribution of the textures).
 - Balance (bot tests): good player ~3.5 min, no falls; sloppy ~6 min, 1 fall; casual 7-10 min, 0-1 falls (usually on Wall 4's two catapults). Idle hero: Wall 1 falls after ~100 s.
+
+---
+
+## 13. Cannons, coins and the enemy side (user request)
+
+- **The Thrower is now a Cannon** (`"cannon"` in `enemy_data.gd`, same balance numbers). Picture: `enemy_cannon.png`, a strip of 8 frames (60 x 30, drawn 2x) cut from the user's `cannon_spritesheet.png`: 0 idle, 2-7 blast + smoke. It faces the side it aims at, tilts down (max 0.3 rad) around its wheel axle while loading (fuse sparks, glow), fires the user's cannonball from the muzzle with a kick, then levels. When destroyed it explodes. Slinger and Catapult are unchanged.
+- **Coins:** `coin_spin.png` (10 frames, from the user's `coin_Sheet.png`). The HUD coin spins when you earn coins; a spinning coin pops out of every defeated enemy and with the retake bonus. `icon_coin.png` = still frame (shop, build screen).
+- **Enemy-side walls** (`ruins_1-4.png`) are drawn by `tools/make_ruins_art.gd` from the brick pictures, built like our wall: columns of bricks (40 x 14, smaller because far away) on that wall's own last layer, with breaches (one goes through the last layer: that's how it fell), chipped tops, cracks, fallen bricks in front, red banners. `sea.png` (wall 5) is unchanged.
+- `ArtData` supports frame strips (`"frames"` key; `hframes` on the sprite, size = one frame).
+- Tools: `make_brick_art.gd` (bricks from texture packs), `make_cannon_coin_art.gd` (cannon + coin sheets), `make_ruins_art.gd` (enemy-side walls from the bricks). After changing PNGs from a script, run `godot --headless --path . --import` before playing headless.

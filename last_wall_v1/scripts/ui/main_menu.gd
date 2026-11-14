@@ -27,8 +27,10 @@ func _ready() -> void:
 	add_child(wall)
 	add_child(HeroScript.new())
 	for x in [330.0, 640.0, 950.0]:
-		var e := ArtData.make_sprite("enemy_thrower")
+		var e := ArtData.make_sprite("enemy_cannon")           # idle frame, barrel toward the middle
 		e.position = Vector2(x, GameData.ENEMY_Y)
+		e.flip_h = x > GameData.FIELD_CENTER_X
+		e.offset = Vector2(-7 if e.flip_h else 7, 0)
 		add_child(e)
 
 	var layer := CanvasLayer.new()

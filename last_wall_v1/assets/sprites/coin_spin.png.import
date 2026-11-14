@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l620704v86e1"
-path="res://.godot/imported/enemy_thrower.png-7f472243ae68e4af28be85ae416e6f93.ctex"
+uid="uid://brtypbo4nep1v"
+path="res://.godot/imported/coin_spin.png-b834baae27c951acf15a83ef3a7dee8d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/enemy_thrower.png"
-dest_files=["res://.godot/imported/enemy_thrower.png-7f472243ae68e4af28be85ae416e6f93.ctex"]
+source_file="res://assets/sprites/coin_spin.png"
+dest_files=["res://.godot/imported/coin_spin.png-b834baae27c951acf15a83ef3a7dee8d.ctex"]
 
 [params]
 

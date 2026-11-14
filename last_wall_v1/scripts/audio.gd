@@ -13,7 +13,7 @@ var _next_player := 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS   # sounds keep going while paused
 	for sound_name in AudioData.SOUNDS:
-		var stream := _find(AudioData.FOLDER, sound_name)
+		var stream := _find(AudioData.FOLDER, AudioData.ALIASES.get(sound_name, sound_name))
 		if stream:
 			_streams[sound_name] = stream
 		else:

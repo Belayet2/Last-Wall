@@ -4,6 +4,7 @@ extends Node2D
 
 const FxData = preload("res://scripts/data/fx_data.gd")
 const GameData = preload("res://scripts/data/game_data.gd")
+const ArtData = preload("res://scripts/data/art_data.gd")
 
 var _camera: Camera2D
 var _shake := 0.0
@@ -105,6 +106,22 @@ func float_text(pos: Vector2, text: String, color: Color) -> void:
 	t.tween_property(holder, "position:y", pos.y - FxData.FLOAT_TEXT_RISE, FxData.FLOAT_TEXT_TIME).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	t.tween_property(holder, "modulate:a", 0.0, FxData.FLOAT_TEXT_TIME * 0.5).set_delay(FxData.FLOAT_TEXT_TIME * 0.5)
 	t.chain().tween_callback(holder.queue_free)
+
+
+## A spinning coin pops up with text beside it (coins from an enemy, the retake bonus).
+func coin_pop(pos: Vector2, text: String) -> void:
+	var coin := ArtData.make_sprite("coin_spin")
+	coin.position = pos
+	add_child(coin)
+	var frames := coin.hframes
+	var time := FxData.FLOAT_TEXT_TIME
+	var t := coin.create_tween().set_parallel(true)
+	t.tween_method(func(v: float) -> void: coin.frame = int(v) % frames, 0.0, float(frames * 2) - 0.01, time)
+	t.tween_property(coin, "position:y", pos.y - FxData.FLOAT_TEXT_RISE, time).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(coin, "modulate:a", 0.0, time * 0.5).set_delay(time * 0.5)
+	t.chain().tween_callback(coin.queue_free)
+	var half := ArtData.size_of("coin_spin").x * 0.5
+	float_text(pos + Vector2(half + 4.0 + text.length() * 6.0, 0), text, FxData.COIN_COLOR)
 
 
 static func _fade(color: Color) -> Gradient:

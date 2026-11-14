@@ -1,9 +1,14 @@
 LAST WALL - credits
 
-Bricks (brick_*.png, foundation_*.png): cut from the "Brick Walls Vol.1", "Old Brick Vol.1"
-and "Painted Brick Vol.1" texture packs by Tempisq (game-ready textures, royalty-free,
-credit appreciated). Made into bricks by tools/make_brick_art.gd.
+Bricks (brick_*.png, foundation_*.png, and the broken walls in ruins_1-4.png): cut from the
+"Brick Walls Vol.1", "Old Brick Vol.1" and "Painted Brick Vol.1" texture packs by Tempisq
+(game-ready textures, royalty-free, credit appreciated). Made into bricks by tools/make_brick_art.gd.
 The raw texture packs are not included in this project (their license does not allow sharing them).
+
+Cannon (enemy_cannon.png, icon_cannon.png, cannonball.png): cut from cannon_spritesheet.png
+  author: ?   source: ?   license: ?      <- fill in where you downloaded it from
+Coin (coin_spin.png, icon_coin.png): cut from coin_Sheet.png
+  author: ?   source: ?   license: ?      <- fill in where you downloaded it from
 
 Other placeholder art: drawn by code (tools/make_placeholder_art.gd) for this project.
 Placeholder sounds: synthesized by code (tools/make_placeholder_audio.gd) for this project.

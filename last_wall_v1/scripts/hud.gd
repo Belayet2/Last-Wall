@@ -27,6 +27,7 @@ var _hp_bar: ProgressBar
 var _hp_fill: StyleBoxFlat
 var _hp_label: Label
 var _coins_label: Label
+var _coin_icon: TextureRect
 var _enemy_row: HBoxContainer
 var _enemy_icons: Array[TextureRect] = []
 var _intro: VBoxContainer
@@ -83,6 +84,7 @@ func set_coins(coins: int) -> void:
 	_coins = coins
 	_coins_label.text = str(coins)
 	if gained:
+		UI.spin_coin(_coin_icon)
 		_coins_label.pivot_offset = _coins_label.size * 0.5
 		_coins_label.scale = Vector2.ONE * FxData.COIN_PUNCH
 		create_tween().tween_property(_coins_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -337,7 +339,8 @@ func _build_coin_panel() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	panel.add_child(row)
-	row.add_child(UI.icon("icon_coin"))
+	_coin_icon = UI.coin_icon()
+	row.add_child(_coin_icon)
 	_coins_label = UI.label("0", 24, UI.ACCENT)
 	_coins_label.custom_minimum_size = Vector2(36, 0)
 	row.add_child(_coins_label)

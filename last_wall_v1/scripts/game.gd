@@ -221,7 +221,7 @@ func _on_enemy_died(enemy: Node) -> void:
 	GameState.add_coins(coins)
 	GameState.enemies_defeated += 1
 	GameState.audio.play("coin")
-	_fx.float_text((enemy as Node2D).global_position + Vector2(0, FxData.COIN_TEXT_OFFSET_Y), "+%d" % coins, FxData.COIN_COLOR)
+	_fx.coin_pop((enemy as Node2D).global_position + Vector2(-14, FxData.COIN_TEXT_OFFSET_Y), "+%d" % coins)
 	_fx.hit_stop()
 	_alive -= 1
 	if enemy != _boss:
@@ -239,7 +239,7 @@ func _on_wave_cleared() -> void:
 	_wall.heal_full()
 	var bonus := GameState.wave_cleared(_wall.get_layout())
 	GameState.audio.play("wall_held")
-	_fx.float_text(Vector2(GameData.FIELD_CENTER_X, GameData.WALL_TOP - 10), "Retake bonus +%d" % bonus, FxData.COIN_COLOR)
+	_fx.coin_pop(Vector2(GameData.FIELD_CENTER_X - 90, GameData.WALL_TOP - 30), "Retake bonus +%d" % bonus)
 	if GameState.is_last_wall():
 		_finish("win", "Victory!", "The flagship sinks. Every wall is ours again.")
 		return

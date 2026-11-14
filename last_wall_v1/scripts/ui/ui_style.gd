@@ -77,6 +77,31 @@ static func icon(key: String) -> TextureRect:
 	return r
 
 
+## The coin from coin_spin.png (frame 0). Use spin_coin() to make it turn.
+static func coin_icon() -> TextureRect:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = ArtData.texture("coin_spin")
+	var frame_w := float(atlas.atlas.get_width()) / ArtData.frames_of("coin_spin")
+	atlas.region = Rect2(0, 0, frame_w, atlas.atlas.get_height())
+	var r := TextureRect.new()
+	r.texture = atlas
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.custom_minimum_size = ArtData.size_of("coin_spin")
+	r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
+
+
+static func spin_coin(r: TextureRect) -> void:
+	var atlas: AtlasTexture = r.texture
+	var frames := ArtData.frames_of("coin_spin")
+	var frame_w := atlas.region.size.x
+	var t := r.create_tween()
+	t.tween_method(func(v: float) -> void: atlas.region.position.x = float(int(v) % frames) * frame_w, 0.0, float(frames) - 0.01, 0.45)
+	t.tween_callback(func() -> void: atlas.region.position.x = 0.0)
+
+
 static func button(text: String, primary: bool = true, min_size: Vector2 = Vector2(190, 46), font_size: int = 22) -> Button:
 	var b := Button.new()
 	b.text = text

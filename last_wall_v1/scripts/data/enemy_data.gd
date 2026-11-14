@@ -19,7 +19,7 @@ const BOSS := {
 	"roam_left": 260.0,               # it sails between these x positions
 	"roam_right": 1020.0,
 	"ball_art": "cannonball",
-	"ball_size": 24.0,
+	"ball_size": 22.0,                # the ball picture is 11 x 11, drawn twice as big
 	"ball_speed": 175.0,
 	"wall_damage": 12,
 	"return_damage": 1,
@@ -50,7 +50,10 @@ const MARKER_SCALE_MAX := 1.5
 ## "aim_spread" = it aims at the wall up to this far left/right of where it stands
 ##                (the build screen shows these spots in red).
 const TYPES := {
-	"thrower": {
+	## The cannon (replaces the old stone thrower). Its picture is one strip of 8 frames (60 x 30 each):
+	## 0 idle, 1 squashed, 2-7 fire + smoke. In "anim", points are pixels in ONE frame, cannon pointing right:
+	## "center" = middle of the cannon, "axle" = wheel axle (it tilts around it), "muzzle" = where the ball leaves.
+	"cannon": {
 		"hp": 2,
 		"throw_interval": 3.0,
 		"stone_speed": 150.0,
@@ -59,12 +62,15 @@ const TYPES := {
 		"coins": 5,
 		"return_damage": 1,
 		"stone_size": 22.0,
-		"sprite": "enemy_thrower",
-		"windup_sprite": "enemy_thrower_windup",
-		"icon": "icon_enemy",
+		"stone_art": "cannonball",
+		"sound": "small_cannon",
+		"sprite": "enemy_cannon",
+		"anim": {"idle": 0, "windup": 0, "fire": [2, 3, 4, 5, 6, 7], "fps": 14.0,
+			"center": Vector2(23, 15), "axle": Vector2(13, 23), "muzzle": Vector2(41, 13)},
+		"max_tilt": 0.3,                  # the barrel tilts down toward the target at most this much (radians)
+		"icon": "icon_cannon",
 		"windup_time": 0.7,
-		"hand": Vector2(14, -21),
-		"size": Vector2(48, 56),
+		"size": Vector2(72, 56),
 	},
 	"slinger": {
 		"hp": 1,

@@ -6,6 +6,7 @@ const SHAKE_WALL_HIT := 5.0
 const SHAKE_WALL_CRACK := 12.0      # a brick of the last layer breaks (the wall falls)
 const SHAKE_BRICK_BREAK := 7.0      # one of your bricks breaks
 const SHAKE_ENEMY_DOWN := 4.0
+const SHAKE_SMALL_CANNON := 1.5     # an enemy cannon fires
 
 # --- Hit-stop: the game almost freezes for a moment when an enemy falls ---
 const HIT_STOP_TIME := 0.06         # real seconds
@@ -62,6 +63,17 @@ const WALL_RUBBLE := {
 	"speed_min": 60.0, "speed_max": 160.0, "gravity": Vector2(0, 400), "damping": 10.0,
 	"size_min": 3.0, "size_max": 6.0, "color": Color(0.62, 0.58, 0.52),
 	"rect": Vector2(600, 4),
+}
+## Enemy cannon: the fuse is lit (windup) and the shot.
+const FUSE_SPARK := {
+	"amount": 8, "lifetime": 0.35, "direction": Vector2(0, -1), "spread": 60.0,
+	"speed_min": 30.0, "speed_max": 80.0, "gravity": Vector2(0, 200), "damping": 0.0,
+	"size_min": 2.0, "size_max": 3.0, "color": Color(1.0, 0.75, 0.25),
+}
+const SMALL_MUZZLE_FLASH := {
+	"amount": 10, "lifetime": 0.2, "direction": Vector2(0, 1), "spread": 35.0,
+	"speed_min": 60.0, "speed_max": 150.0, "gravity": Vector2(0, 0), "damping": 200.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(1.0, 0.8, 0.3),
 }
 ## A brick breaks (its color is set from brick_data.gd).
 const BRICK_RUBBLE := {

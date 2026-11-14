@@ -14,7 +14,7 @@ const WALLS := [
 		"tip": "Move with A / D or the arrow keys.  Stand on the red marks to block.",
 		"foundation_hp": 40,
 		"max_stones": 2,
-		"enemies": ["thrower", "thrower", "thrower"],
+		"enemies": ["cannon", "cannon", "cannon"],
 	},
 	{
 		"title": "Berin's Wall",
@@ -23,7 +23,7 @@ const WALLS := [
 		"tip": "New: Slingers. Their small stones fly fast, but one hit knocks them down.",
 		"foundation_hp": 34,
 		"max_stones": 2,
-		"enemies": ["thrower", "slinger", "thrower", "slinger"],
+		"enemies": ["cannon", "slinger", "cannon", "slinger"],
 	},
 	{
 		"title": "Corwin's Wall",
@@ -32,7 +32,7 @@ const WALLS := [
 		"tip": "New: the Catapult. Its boulders break bricks fast. Bounce them back!",
 		"foundation_hp": 30,
 		"max_stones": 3,
-		"enemies": ["thrower", "slinger", "catapult", "slinger", "thrower"],
+		"enemies": ["cannon", "slinger", "catapult", "slinger", "cannon"],
 	},
 	{
 		"title": "Doran's Wall",
@@ -41,7 +41,7 @@ const WALLS := [
 		"tip": "Two catapults this time. Keep moving!",
 		"foundation_hp": 26,
 		"max_stones": 3,
-		"enemies": ["slinger", "catapult", "thrower", "thrower", "catapult", "slinger"],
+		"enemies": ["slinger", "catapult", "cannon", "cannon", "catapult", "slinger"],
 	},
 	{
 		"title": "The Sea Wall",
