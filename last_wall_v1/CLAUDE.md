@@ -280,3 +280,14 @@ The wall works like a brick-breaker game turned upside down (`scripts/wall.gd`, 
 - **Enemy side (walls 1-4):** `sky.png` + a broken wall drawn by `scripts/scenery.gd` (`enemy_wall`) from the next wall's bricks: 48 x 16 bricks (far away), last layer + 3 rows + battlements, broken the way our wall breaks (whole bricks out, cracks around holes, one breach through the last layer placed between the enemies), small rubble, red enemy banners. Wall 5 keeps `sea.png`.
 - `scripts/scenery.gd` = shared builder: bricks redrawn sharp at any size (cached), walls from text maps, side walls, enemy wall, banners, flags, clouds.
 - Balance (bot tests): good ~3 min, sloppy ~5 min, casual 5-8 min with 0-2 falls. An idle hero cannot break the Last Wall (it held 4-5 min while the standing shield slowly knocked out the cannons).
+
+---
+
+## 15. Cleanup and balancing (user request)
+
+- **No landing markers** (the red circles on the path): removed with their art and numbers. The only warning now is the enemy winding up / the cannon aiming (and the boss glowing).
+- **No side walls at all.** The field and our wall use the full width: `FIELD_LEFT/RIGHT` = 0 / 1280 (stones bounce off the screen edges), `BrickData.COLUMNS` = 20, `COLUMN_LEFT` = 0. The enemy-side wall also spans the full width.
+- **Click and drag to build:** hold the left button and drag across the wall = one brick on each column you pass (once per drag); right button = take one off each column. The column comes from the input event's own position (`make_input_local`).
+- **Assets folder:** `assets/sprites/` is sorted into `characters/ bricks/ world/ shots/ ui/ screens/`; unused files deleted (marker, portrait_messenger, icon_brick). Paths live only in `art_data.gd`; the art tools save to the path listed there.
+- **Balancing:** `BALANCE.md` (project folder) explains every number in `scripts/data/` and how to test. `level_data.gd` `START_WALL` starts the game at any wall for testing. `tools/balance_bot.gd` plays the whole game headless and prints wave times / falls (`-- good|sloppy|casual|idle [seed]`).
+- Balance now (bot): good ~3 min, sloppy ~4.5 min, casual 6-7 min, no falls. Easier than before (wider wall); real players have no landing marks, so they will find it harder than the bot.

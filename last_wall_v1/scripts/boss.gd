@@ -24,7 +24,6 @@ var max_hp := 1
 var dead := false
 
 var _stones_parent: Node
-var _markers_parent: Node
 var _sprite: Sprite2D
 var _smoke: CPUParticles2D
 var _fire: CPUParticles2D
@@ -34,16 +33,15 @@ var _entering := true
 var _time := 0.0
 var _state := "idle"          # idle -> windup -> firing -> idle
 var _timer := 0.0
-var _shots: Array = []        # [{port, target, marker}] for the current volley
+var _shots: Array = []        # [{port, target}] for the current volley
 var _flash: Tween
 var _rock: Tween
 var _draw_scale := Vector2.ONE
 var _explosions_left := 0
 
 
-func setup(stones_parent: Node, markers_parent: Node) -> void:
+func setup(stones_parent: Node) -> void:
 	_stones_parent = stones_parent
-	_markers_parent = markers_parent
 
 
 func _ready() -> void:
@@ -127,7 +125,7 @@ func _start_volley() -> void:
 	for i in range(count):
 		var port_index := (start_port + i) % ports.size()
 		var target := Vector2(first + step * i, GameData.WALL_TOP + 10.0)
-		_shots.append({"port": port_index, "target": target, "marker": _make_marker(port_index, target)})
+		_shots.append({"port": port_index, "target": target})
 	# the ship glows: "here it comes"
 	if _flash:
 		_flash.kill()
@@ -154,7 +152,6 @@ func _fire_next() -> void:
 	ball.art = data["ball_art"]
 	var speed: float = data["ball_speed"]
 	ball.setup(start, (target - start).normalized() * speed, data["ball_size"], data["wall_damage"], data["return_damage"])
-	ball.marker = shot["marker"]
 	_stones_parent.add_child(ball)
 	GameState.audio.play("cannon")
 	var fx := _fx()
@@ -164,23 +161,6 @@ func _fire_next() -> void:
 		fx.shake(FxData.SHAKE_CANNON)
 	_kick(0.04)
 	_timer = data["volley_gap"]
-
-
-func _make_marker(port_index: int, target: Vector2) -> Node2D:
-	var start := _port_position(port_index)
-	var t := (GameData.CATCH_Y - start.y) / (target.y - start.y)
-	var stone_size: float = data["ball_size"]
-	var mark_scale := clampf(stone_size / EnemyData.MARKER_BASE_STONE, EnemyData.MARKER_SCALE_MIN, EnemyData.MARKER_SCALE_MAX)
-	var marker := ArtData.make_sprite("marker", ArtData.size_of("marker") * mark_scale)
-	marker.position = Vector2(lerpf(start.x, target.x, t), GameData.MARKER_Y)
-	marker.modulate.a = 0.0
-	_markers_parent.add_child(marker)
-	marker.create_tween().tween_property(marker, "modulate:a", 1.0, 0.3)
-	var base := marker.scale
-	var pulse := marker.create_tween().set_loops()
-	pulse.tween_property(marker, "scale", base * FxData.MARKER_PULSE, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
-	pulse.tween_property(marker, "scale", base, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
-	return marker
 
 
 func _port_position(port_index: int) -> Vector2:
@@ -227,9 +207,6 @@ func _die() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS     # keep exploding and sinking behind the Victory title
 	remove_from_group("enemies")
 	set_deferred("monitorable", false)
-	for shot in _shots:
-		if is_instance_valid(shot["marker"]):
-			shot["marker"].queue_free()
 	_shots.clear()
 	_explosions_left = FxData.BOSS_EXPLOSIONS
 	_state = "dying"

@@ -1,5 +1,5 @@
 ## Scenery built from the game's own pictures, so everything looks like the same world:
-##   - brick walls of any size, from the brick pictures (the side walls, the enemy side, the story)
+##   - brick walls of any size, from the brick pictures (the enemy side, the story)
 ##   - sky, clouds, sea and banners for the story scenes
 ## Bricks are redrawn sharp at the size asked for (with their own dark outline), and kept in a cache.
 ## Replace a brick picture and every wall drawn from it changes with it.
@@ -92,35 +92,6 @@ static func wall(rows: Array, art: String, size: Vector2i, bond: String = "stack
 	return node
 
 
-## One of the two side walls of the field (left or right): one brick wide, from the top of the
-## screen to the bottom, laid like real masonry. It uses the current wall's own bricks.
-static func side_wall(art: String, right: bool) -> Node2D:
-	var size := Vector2i(int(BrickData.COLUMN_LEFT), int(BrickData.BRICK_H))
-	var rows := []
-	var count := ceili(GameData.SCREEN_HEIGHT / size.y) + 1
-	for r in range(count):
-		rows.append("#" if (count - 1 - r) % 2 == 0 else "##")
-	var node := wall(rows, art, size, "running")
-	node.position = Vector2(GameData.SCREEN_WIDTH - size.x if right else 0.0, GameData.SCREEN_HEIGHT - count * size.y)
-	node.modulate = Color(0.86, 0.86, 0.88)
-	# a soft shadow on the field side, so it reads as a wall standing up
-	var shade := TextureRect.new()
-	shade.texture = _gradient(Color(0, 0, 0, 0.32), Color(0, 0, 0, 0.0), right)
-	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	shade.stretch_mode = TextureRect.STRETCH_SCALE
-	shade.size = Vector2(12, count * size.y)
-	shade.position = Vector2(-12.0 if right else float(size.x), 0)
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	node.add_child(shade)
-	var edge := ColorRect.new()
-	edge.color = Color(0.2, 0.15, 0.12, 0.6)
-	edge.size = Vector2(2, count * size.y)
-	edge.position = Vector2(0.0 if right else float(size.x - 2), 0)
-	edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	node.add_child(edge)
-	return node
-
-
 ## The enemy side: the next wall out, held by the enemy, seen from far away (smaller bricks).
 ## Built like our wall (a last layer + 3 rows, battlements on top) and broken the way ours breaks:
 ## whole bricks knocked out, cracked bricks around the holes, one breach right through the last layer.
@@ -128,7 +99,8 @@ static func side_wall(art: String, right: bool) -> Node2D:
 ## `avoid` = x positions where enemies stand (the breach goes between them, where you can see it).
 static func enemy_wall(art: String, seed: int, avoid: Array = []) -> Node2D:
 	var size := Vector2i(48, 16)
-	var cols := int((GameData.SCREEN_WIDTH - 2.0 * BrickData.COLUMN_LEFT) / size.x)
+	var cols := ceili(GameData.SCREEN_WIDTH / size.x)
+	var left := (GameData.SCREEN_WIDTH - cols * size.x) * 0.5     # centered, the ends just off screen
 	var rows := 5                                    # battlements + 3 rows + the last layer
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
@@ -141,7 +113,7 @@ static func enemy_wall(art: String, seed: int, avoid: Array = []) -> Node2D:
 	# the breach: down through the last layer, widening toward the top
 	var b := rng.randi_range(4, cols - 6)
 	for attempt in range(40):
-		var mid := BrickData.COLUMN_LEFT + (b + 1) * size.x
+		var mid := left + (b + 1) * size.x
 		var clear := true
 		for x in avoid:
 			if absf(float(x) - mid) < 110.0:
@@ -187,7 +159,7 @@ static func enemy_wall(art: String, seed: int, avoid: Array = []) -> Node2D:
 	var bricks := wall(lines, art, size)
 	node.add_child(bricks)
 	var top := 140.0 - rows * size.y
-	bricks.position = Vector2(BrickData.COLUMN_LEFT, top)
+	bricks.position = Vector2(left, top)
 	# shadow at the foot of the wall
 	var shadow := TextureRect.new()
 	shadow.texture = _gradient(Color(0, 0, 0, 0.28), Color(0, 0, 0, 0), false, true)
@@ -202,7 +174,7 @@ static func enemy_wall(art: String, seed: int, avoid: Array = []) -> Node2D:
 	for i in range(7):
 		var loose := Sprite2D.new()
 		loose.texture = brick(art, piece, 1 + i % 2)
-		loose.position = Vector2(BrickData.COLUMN_LEFT + (b + 1) * size.x + rng.randf_range(-56, 56), rng.randf_range(139, 147))
+		loose.position = Vector2(left + (b + 1) * size.x + rng.randf_range(-56, 56), rng.randf_range(139, 147))
 		loose.rotation = rng.randf_range(-0.25, 0.25)
 		node.add_child(loose)
 	# enemy banners hang on the standing parts
@@ -213,7 +185,7 @@ static func enemy_wall(art: String, seed: int, avoid: Array = []) -> Node2D:
 		if hung >= 2 or absi(col - b) < 4:
 			continue
 		var fl := banner(ENEMY_RED, Vector2(22, 38), Color8(60, 18, 20))
-		fl.position = Vector2(BrickData.COLUMN_LEFT + col * size.x + size.x * 0.5, top + size.y + 2)
+		fl.position = Vector2(left + col * size.x + size.x * 0.5, top + size.y + 2)
 		node.add_child(fl)
 		hung += 1
 	return node

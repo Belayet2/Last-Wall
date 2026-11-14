@@ -2,7 +2,8 @@ extends Node2D
 ## Our wall: a grid of bricks, like a brick-breaker game turned upside down.
 ## Every column is a stack: the last layer (foundation) at the bottom, the bricks you built on top.
 ## A hostile stone hits the TOP brick of its column. If a last-layer brick breaks, the wall falls.
-## Build mode (before the fight): click a column to lay the selected brick on top, right-click to take the top one off.
+## Build mode (before the fight): click (or drag across) columns to lay the selected brick on top of each,
+## right-click (or right-drag) to take the top ones off.
 
 signal wall_fallen
 signal foundation_changed(hp: int, max_hp: int)   # the weakest brick of the last layer
@@ -27,6 +28,8 @@ var _labels: Array[Label] = []      # build mode: each column's total HP
 var _danger: Array[ColorRect] = []  # build mode: red strip where enemies aim the most
 var _ghost: Sprite2D
 var _hover := -1
+var _paint_button := 0              # mouse button held while dragging over the wall (0 = none)
+var _painted := {}                  # columns already done in this drag
 var _build_layer: Node2D
 
 
@@ -198,19 +201,46 @@ func set_danger(values: Array) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not build_mode:
 		return
+	if not (event is InputEventMouse):
+		return
+	var mouse := (make_input_local(event) as InputEventMouse).position   # where the event happened, in the world
 	if event is InputEventMouseMotion:
-		_set_hover(_column_at(get_global_mouse_position()))
-	elif event is InputEventMouseButton and event.pressed:
-		var col := _column_at(get_global_mouse_position())
+		_set_hover(_column_at(mouse))
+		if _paint_button != 0:                       # dragging: every new column gets one brick (or loses one)
+			_paint(_column_x_only(mouse.x))
+	elif event is InputEventMouseButton:
+		var button := (event as InputEventMouseButton).button_index
+		if not event.pressed:
+			if button == _paint_button:
+				_paint_button = 0
+			return
+		if button != MOUSE_BUTTON_LEFT and button != MOUSE_BUTTON_RIGHT:
+			return
+		var col := _column_at(mouse)
 		if col < 0:
 			return
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if not place(col, selected_type):
-				_nudge(col)
-			get_viewport().set_input_as_handled()
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			take_off(col)
-			get_viewport().set_input_as_handled()
+		_paint_button = button
+		_painted.clear()
+		_paint(col)
+		get_viewport().set_input_as_handled()
+
+
+## Click and drag: left button lays one brick on each column you pass over, right button takes one off.
+func _paint(col: int) -> void:
+	if col < 0 or _painted.has(col):
+		return
+	_painted[col] = true
+	if _paint_button == MOUSE_BUTTON_LEFT:
+		if not place(col, selected_type):
+			_nudge(col)
+	elif _paint_button == MOUSE_BUTTON_RIGHT:
+		take_off(col)
+
+
+## While dragging, only left/right matters (so a wobbly drag still works).
+func _column_x_only(x: float) -> int:
+	var col := floori((x - BrickData.COLUMN_LEFT) / BrickData.BRICK_W)
+	return col if col >= 0 and col < BrickData.COLUMNS else -1
 
 
 ## The column under the mouse (anywhere over the wall or just above it), or -1.

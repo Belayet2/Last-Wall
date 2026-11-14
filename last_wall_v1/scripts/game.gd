@@ -29,7 +29,6 @@ var _fx: FxScript
 var _boss: BossScript
 var _enemies: Array[Node] = []
 var _stones: Node2D
-var _markers: Node2D
 var _alive := 0
 var _fighting := false
 var _ended := false
@@ -48,10 +47,6 @@ func _ready() -> void:
 
 	_fx = FxScript.new()
 	add_child(_fx)
-
-	_markers = Node2D.new()
-	_markers.name = "Markers"
-	add_child(_markers)
 
 	_wall = WallScript.new()
 	_wall.setup(GameState.current_layout(), _level["foundation"])
@@ -83,8 +78,7 @@ func _ready() -> void:
 
 
 ## Background used by the game, the main menu and the story (wall_number picks the backdrop and ground):
-## the sky (or sea) with the next wall out, broken, at the top; the field; the path; and a brick
-## side wall on each side, made of this wall's own bricks.
+## the sky (or sea) with the next wall out, broken, at the top; the field; and the path.
 static func build_world(parent: Node, wall_number: int = 1) -> void:
 	var level: Dictionary = LevelData.WALLS[wall_number - 1]
 	var cx := GameData.SCREEN_WIDTH * 0.5
@@ -99,10 +93,7 @@ static func build_world(parent: Node, wall_number: int = 1) -> void:
 		parent.add_child(far)
 	_add_bg(parent, level["ground"], Vector2(cx, GameData.GROUND_TOP + GameData.GROUND_HEIGHT * 0.5), false, -10)
 	_add_bg(parent, "path", Vector2(cx, GameData.PATH_TOP + GameData.PATH_HEIGHT * 0.5), false, -10)
-	for right in [false, true]:
-		var side := Scenery.side_wall(level["foundation"], right)
-		side.z_index = -4
-		parent.add_child(side)
+
 
 
 ## Where enemy number i (of count) stands, left to right.
@@ -191,7 +182,7 @@ func _spawn_enemies(level: Dictionary) -> void:
 	var count := types.size()
 	for i in range(count):
 		var enemy := EnemyScript.new()
-		enemy.setup(types[i], i, level["max_stones"], _stones, _markers)
+		enemy.setup(types[i], i, level["max_stones"], _stones)
 		enemy.position = Vector2(enemy_x(i, count), GameData.ENEMY_Y)
 		enemy.died.connect(_on_enemy_died)
 		add_child(enemy)
@@ -201,7 +192,7 @@ func _spawn_enemies(level: Dictionary) -> void:
 
 func _spawn_boss() -> void:
 	_boss = BossScript.new()
-	_boss.setup(_stones, _markers)
+	_boss.setup(_stones)
 	_boss.died.connect(_on_enemy_died)
 	_boss.hp_changed.connect(_hud.set_boss_hp)
 	_boss.phase_changed.connect(_on_boss_phase)

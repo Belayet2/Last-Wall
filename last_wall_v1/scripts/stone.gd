@@ -17,7 +17,6 @@ var returned := false
 var wall_damage := 0
 var return_damage := 1
 var diameter := 20.0
-var marker: Node2D = null   # landing marker, removed when the stone is bounced or gone
 var art := "stone"          # picture while hostile ("cannonball" for the boss)
 
 var _life := 0.0
@@ -97,7 +96,6 @@ func make_returned(new_velocity: Vector2) -> void:
 	returned = true
 	velocity = new_velocity
 	remove_from_group("threat")
-	_clear_marker()
 	set_deferred("collision_layer", LAYER_RETURNED)
 	set_deferred("collision_mask", LAYER_ENEMY)
 	ArtData.apply(_sprite, "stone_returned", Vector2(diameter, diameter) * 1.25)
@@ -109,7 +107,6 @@ func remove() -> void:
 	if _gone:
 		return
 	_gone = true
-	_clear_marker()
 	queue_free()
 
 
@@ -123,8 +120,3 @@ func _puff(pos: Vector2, preset: Dictionary) -> void:
 	if is_instance_valid(_fx):
 		_fx.burst(pos, preset)
 
-
-func _clear_marker() -> void:
-	if is_instance_valid(marker):
-		marker.queue_free()
-	marker = null

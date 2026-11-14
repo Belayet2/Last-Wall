@@ -21,7 +21,7 @@ func _ready() -> void:
 	wall.setup(GameState.current_layout(), "foundation_1")   # the Last Wall, whole
 	add_child(wall)
 	add_child(HeroScript.new())
-	for x in [352.0, 640.0, 928.0]:
+	for x in [320.0, 640.0, 960.0]:
 		var e := ArtData.make_sprite("enemy_cannon")           # idle frame, barrel toward the middle
 		e.position = Vector2(x, GameData.ENEMY_Y)
 		e.flip_h = x > GameData.FIELD_CENTER_X

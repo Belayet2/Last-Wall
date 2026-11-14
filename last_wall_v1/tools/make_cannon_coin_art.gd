@@ -11,6 +11,7 @@ extends SceneTree
 ##   icon_coin.png     = the first coin frame
 
 const OUT := "res://assets/sprites/"
+const ArtData = preload("res://scripts/data/art_data.gd")
 const CANNON_ROW := Rect2i(0, 80, 480, 30)      # the firing animation row of the sheet
 const CANNON_ICON := Rect2i(2, 2, 37, 26)       # first cannon of the top row
 const BALL_AREA := Rect2i(364, 32, 16, 44)      # the cannonball in the middle row
@@ -41,5 +42,13 @@ func _coin(sheet: Image) -> void:
 
 
 func _save(img: Image, key: String) -> void:
-	img.save_png(ProjectSettings.globalize_path(OUT + key + ".png"))
+	img.save_png(ProjectSettings.globalize_path(_path_of(key)))
 	print("saved ", key, " ", img.get_size())
+
+## Where a picture lives (its path in scripts/data/art_data.gd); makes the folder if needed.
+func _path_of(key: String) -> String:
+	var path := OUT + key + ".png"
+	if ArtData.SPRITES.has(key):
+		path = ArtData.SPRITES[key]["path"]
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	return path

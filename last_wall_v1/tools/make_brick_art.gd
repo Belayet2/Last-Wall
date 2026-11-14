@@ -10,9 +10,9 @@ extends SceneTree
 ##   foundation_1 .. foundation_5                          = the pre-built bottom row of each wall
 ##   brick_cracks_1 / brick_cracks_2                       = cracks drawn over damaged bricks
 ##   brick_slot                                            = empty place where a brick can go (build screen)
-##   icon_brick                                            = HUD / shop icon
 
 const OUT := "res://assets/sprites/"
+const ArtData = preload("res://scripts/data/art_data.gd")
 const W := 64
 const H := 22
 
@@ -50,12 +50,10 @@ func _initialize() -> void:
 			_bevel(img, key.begins_with("foundation"))
 			_save(img, key)
 	else:
-		print("No --src given: only the cracks, slot and icon are made.")
+		print("No --src given: only the cracks and the slot are made.")
 	_save(_cracks(1), "brick_cracks_1")
 	_save(_cracks(2), "brick_cracks_2")
 	_save(_slot(), "brick_slot")
-	if FileAccess.file_exists(OUT + "brick_clay.png"):
-		_save(_icon(Image.load_from_file(ProjectSettings.globalize_path(OUT + "brick_clay.png"))), "icon_brick")
 	quit()
 
 
@@ -165,17 +163,6 @@ func _slot() -> Image:
 	return img
 
 
-## Three little bricks stacked like a wall (26 x 26).
-func _icon(brick: Image) -> Image:
-	var img := Image.create(26, 26, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))
-	var small := brick.duplicate()
-	small.resize(12, 7, Image.INTERPOLATE_BILINEAR)
-	for spot in [Vector2i(1, 17), Vector2i(13, 17), Vector2i(7, 10), Vector2i(7, 3)]:
-		img.blend_rect(small, Rect2i(0, 0, 12, 7), spot)
-	return img
-
-
 func _line(img: Image, a: Vector2i, b: Vector2i, c: Color) -> void:
 	var steps := maxi(absi(b.x - a.x), absi(b.y - a.y))
 	for i in range(steps + 1):
@@ -187,6 +174,14 @@ func _line(img: Image, a: Vector2i, b: Vector2i, c: Color) -> void:
 
 
 func _save(img: Image, key: String) -> void:
-	var path := ProjectSettings.globalize_path(OUT + key + ".png")
+	var path := ProjectSettings.globalize_path(_path_of(key))
 	img.save_png(path)
 	print("saved ", key)
+
+## Where a picture lives (its path in scripts/data/art_data.gd); makes the folder if needed.
+func _path_of(key: String) -> String:
+	var path := OUT + key + ".png"
+	if ArtData.SPRITES.has(key):
+		path = ArtData.SPRITES[key]["path"]
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	return path

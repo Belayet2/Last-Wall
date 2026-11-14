@@ -6,8 +6,8 @@
 ## hits the TOP brick of its column. If ANY brick of the last layer breaks, the wall falls.
 
 # --- Grid (pixels on screen) ---
-const COLUMNS := 18
-const COLUMN_LEFT := 64.0           # x of the first column (a tower stands on each side)
+const COLUMNS := 20                 # 20 x 64 = the full screen width
+const COLUMN_LEFT := 0.0            # x of the first column
 const BRICK_W := 64.0
 const BRICK_H := 22.0
 const ROWS := 4                     # 1 last layer + 3 rows you build

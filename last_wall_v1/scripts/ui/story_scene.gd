@@ -288,7 +288,7 @@ func _scene_hero() -> void:
 	var sky := ArtData.make_sprite("sky")
 	sky.position = Vector2(W * 0.5, 75)
 	add_child(sky)
-	var stands := [352.0, 640.0, 928.0]
+	var stands := [320.0, 640.0, 960.0]
 	add_child(Scenery.enemy_wall(LevelData.WALLS[0]["far_wall"], 7037, stands))
 	var ground := ArtData.make_sprite("ground", Vector2(W, 280))
 	ground.position = Vector2(W * 0.5, 150 + 140)
@@ -304,7 +304,7 @@ func _scene_hero() -> void:
 		add_child(c)
 		var face := -1.0 if c.flip_h else 1.0
 		_cannons.append({"sprite": c, "muzzle": c.position + Vector2(36.0 * face, -4.0)})
-	# the Last Wall, whole, and the side walls
+	# the Last Wall, whole
 	var art: String = LevelData.WALLS[0]["foundation"]
 	var row := ""
 	for c in range(BrickData.COLUMNS):
@@ -312,8 +312,6 @@ func _scene_hero() -> void:
 	var last := Scenery.wall([row, row, row, row], art, Vector2i(int(BrickData.BRICK_W), int(BrickData.BRICK_H)))
 	last.position = Vector2(BrickData.COLUMN_LEFT, 490)
 	add_child(last)
-	for right in [false, true]:
-		add_child(Scenery.side_wall(art, right))
 	# the hero, bigger than in the game
 	var k := 1.4
 	var feet := Vector2(640, 488)

@@ -26,8 +26,6 @@ const KNOCKBACK := 10.0             # enemy is pushed back (up) this far when hi
 const KNOCKBACK_TIME := 0.2
 const SHIELD_NUDGE := 3.0           # shield dips this far when a stone hits it
 const WALL_JIGGLE := 3.0            # wall shakes sideways this far when hit
-const MARKER_PULSE := 1.15          # landing markers pulse to this size
-const MARKER_PULSE_TIME := 0.35
 const COIN_PUNCH := 1.35            # HUD coin number pops to this size
 
 # --- Particle bursts (little pixel squares) ---

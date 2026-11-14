@@ -6,6 +6,7 @@ extends SceneTree
 ## Add "-- --force" to redraw everything, or "-- --only=hero,shield" to redraw some files.
 
 const OUT := "res://assets/sprites/"
+const ArtData = preload("res://scripts/data/art_data.gd")
 const INK := Color8(28, 22, 20)
 
 const STEEL := Color8(176, 182, 194)
@@ -56,20 +57,18 @@ func _init() -> void:
 	_save("ship", _ship)
 	_save("ground", _ground)
 	_save("path", _path)
-	_save("marker", _marker)
 	_save("icon_wall", _icon_wall)
 	_save("icon_slinger", _icon_slinger)
 	_save("icon_catapult", _icon_catapult)
 	_save("story_throne_room", _throne_room)
 	_save("portrait_king", _portrait_king)
 	_save("portrait_commander", _portrait_commander)
-	_save("portrait_messenger", _portrait_messenger)
 
 	quit()
 
 
 func _save(file_name: String, maker: Callable) -> void:
-	var file_path := OUT + file_name + ".png"
+	var file_path := _path_of(file_name)
 	if not only.is_empty():
 		if not only.has(file_name):
 			return
@@ -80,6 +79,16 @@ func _save(file_name: String, maker: Callable) -> void:
 	var img: Image = maker.call()
 	img.save_png(file_path)
 	print("wrote: ", file_path)
+
+
+
+## Where a picture lives (its path in scripts/data/art_data.gd); makes the folder if needed.
+func _path_of(key: String) -> String:
+	var path := OUT + key + ".png"
+	if ArtData.SPRITES.has(key):
+		path = ArtData.SPRITES[key]["path"]
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	return path
 
 
 # ---------------------------------------------------------------- helpers
@@ -512,14 +521,6 @@ func _beach() -> Image:
 
 
 
-func _marker() -> Image:
-	var img := _img(56, 18)
-	_ellipse(img, 28, 9, 27, 8.5, Color(0.95, 0.2, 0.15, 0.95))
-	for y in range(18):
-		for x in range(56):
-			if _inside(x, y, 28, 9, 22, 6):
-				img.set_pixel(x, y, Color(0.95, 0.3, 0.2, 0.3))
-	return img
 
 
 # ---------------------------------------------------------------- HUD icons (small, scaled up 2x in game)
@@ -687,28 +688,6 @@ func _portrait_commander() -> Image:
 	return img
 
 
-func _portrait_messenger() -> Image:
-	var img := _img(96, 112)
-	var brown := Color8(124, 82, 46)
-	_bust(img, Color8(96, 152, 204), SKIN_LIGHT)
-	_line(img, 28, 84, 68, 112, LEATHER, 5)                          # bag strap
-	_ellipse(img, 48, 37, 21, 13, brown)                             # messy hair
-	for hx in [30, 38, 56, 64]:
-		_rect(img, hx, 28, 4, 8, brown)
-	_rect(img, 37, 49, 7, 6, Color8(250, 250, 250))                  # wide eyes
-	_rect(img, 52, 49, 7, 6, Color8(250, 250, 250))
-	_rect(img, 39, 51, 3, 3, INK)
-	_rect(img, 54, 51, 3, 3, INK)
-	_rect(img, 37, 44, 7, 2, brown)                                  # raised brows
-	_rect(img, 52, 44, 7, 2, brown)
-	_rect(img, 46, 55, 4, 6, SKIN_LIGHT.darkened(0.1))
-	_ellipse(img, 48, 67, 5, 4.5, Color8(130, 40, 40))               # shouting mouth
-	_ellipse(img, 36, 60, 4, 2, Color(0.95, 0.5, 0.5, 0.5))          # out of breath
-	_ellipse(img, 60, 60, 4, 2, Color(0.95, 0.5, 0.5, 0.5))
-	_ellipse(img, 70, 42, 2, 3.5, Color8(170, 214, 244))             # sweat
-	_ellipse(img, 25, 52, 2, 3.5, Color8(170, 214, 244))
-	_outline(img)
-	return img
 
 
 # ---------------------------------------------------------------- boss

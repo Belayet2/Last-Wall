@@ -1,7 +1,6 @@
 extends Area2D
 ## An enemy standing on the ruins. Never moves.
 ## Winds up (raises its arm / loads its cannon), then throws or fires from its "hand" (muzzle).
-## A red landing marker on the path shows where to stand to block it.
 ##
 ## Two kinds of pictures (see enemy_data.gd):
 ##   pose swap  = "sprite" + "windup_sprite" (slinger, catapult)
@@ -23,13 +22,11 @@ var max_stones := 2
 var dead := false
 
 var _stones_parent: Node
-var _markers_parent: Node
 var _sprite: Sprite2D
 var _body_size := Vector2.ZERO
 var _timer := 0.0
 var _winding := false
 var _target := Vector2.ZERO
-var _marker: Node2D = null
 var _windup: Tween
 var _flash: Tween
 var _knock: Tween
@@ -40,12 +37,11 @@ var _aim_rotation := 0.0        # cannon: barrel tilt for the current shot
 var _sprite_home := Vector2.ZERO # cannon: where the sprite sits (the wheel axle)
 
 
-func setup(key: String, enemy_index: int, stone_cap: int, stones_parent: Node, markers_parent: Node) -> void:
+func setup(key: String, enemy_index: int, stone_cap: int, stones_parent: Node) -> void:
 	type_key = key
 	index = enemy_index
 	max_stones = stone_cap
 	_stones_parent = stones_parent
-	_markers_parent = markers_parent
 
 
 func _ready() -> void:
@@ -116,20 +112,6 @@ func _start_windup() -> void:
 
 	if not _anim.is_empty():
 		_aim_cannon(windup_time)
-	var start := _throw_origin_after_aim()
-	var t := (GameData.CATCH_Y - start.y) / (_target.y - start.y)
-	var stone_size: float = data["stone_size"]
-	var mark_scale := clampf(stone_size / EnemyData.MARKER_BASE_STONE, EnemyData.MARKER_SCALE_MIN, EnemyData.MARKER_SCALE_MAX)
-	_marker = ArtData.make_sprite("marker", ArtData.size_of("marker") * mark_scale)
-	_marker.position = Vector2(lerpf(start.x, _target.x, t), GameData.MARKER_Y)
-	_marker.modulate.a = 0.0
-	_markers_parent.add_child(_marker)
-	var marker_tween := _marker.create_tween()
-	marker_tween.tween_property(_marker, "modulate:a", 1.0, windup_time * 0.5)
-	var base_scale := _marker.scale
-	var pulse := _marker.create_tween().set_loops()
-	pulse.tween_property(_marker, "scale", base_scale * FxData.MARKER_PULSE, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
-	pulse.tween_property(_marker, "scale", base_scale, FxData.MARKER_PULSE_TIME).set_trans(Tween.TRANS_SINE)
 
 	_windup = create_tween()
 	_windup.set_parallel(true)
@@ -157,12 +139,6 @@ func _aim_cannon(windup_time: float) -> void:
 		fx.burst(global_position + Vector2(-20.0 * _facing, -12.0).rotated(_aim_rotation), FxData.FUSE_SPARK)
 
 
-## The muzzle position once the cannon has finished turning (for the landing marker).
-func _throw_origin_after_aim() -> Vector2:
-	if _anim.is_empty():
-		return _throw_origin()
-	return _muzzle(_aim_rotation)
-
 
 func _throw() -> void:
 	if dead:
@@ -174,8 +150,6 @@ func _throw() -> void:
 	var stone := StoneScript.new()
 	stone.art = data.get("stone_art", "stone")
 	stone.setup(start, (_target - start).normalized() * speed, data["stone_size"], data["wall_damage"], data["return_damage"])
-	stone.marker = _marker
-	_marker = null
 	_stones_parent.add_child(stone)
 	GameState.audio.play(data.get("sound", "throw"))
 
@@ -248,9 +222,6 @@ func _die() -> void:
 	remove_from_group("threat")
 	if _windup:
 		_windup.kill()
-	if is_instance_valid(_marker):
-		_marker.queue_free()
-	_marker = null
 	set_deferred("monitorable", false)
 	var fx := get_tree().get_first_node_in_group("fx")
 	if not _anim.is_empty():

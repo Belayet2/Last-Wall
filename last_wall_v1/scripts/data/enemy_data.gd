@@ -1,6 +1,6 @@
 ## Enemy types. Tune freely.
 
-const WINDUP_TIME := 0.7            # arm raise before each throw (landing marker shows during it)
+const WINDUP_TIME := 0.7            # arm raise before each throw
 const FIRST_THROW_DELAY_MIN := 1.5  # first throw comes between this and throw_interval
 const RETRY_WAIT := 0.25            # wait when too many stones are already in the air
 const INTERVAL_JITTER := 0.15       # +/- 15% random on each throw interval
@@ -23,7 +23,7 @@ const BOSS := {
 	"ball_speed": 175.0,
 	"wall_damage": 12,
 	"return_damage": 1,
-	"windup": 1.0,                    # cannon ports glow and marks appear this long before firing
+	"windup": 1.0,                    # the ship glows this long before firing
 	"volley_gap": 0.7,                # seconds between the cannons of one volley
 	## Cannon muzzles on ship.png (pixels in the 180x100 image). The ship image is drawn bigger in game.
 	"ports": [Vector2(40, 74), Vector2(70, 74), Vector2(100, 74), Vector2(130, 74)],
@@ -39,13 +39,10 @@ const BOSS := {
 const BOSS_SWEEP_STEP := 210.0      # "sweep" volley: each ball lands this far beside the last one
 const BOSS_CLUSTER_STEP := 55.0     # "cluster" volley: balls land close together (one block catches them all)
 
-const MARKER_BASE_STONE := 22.0     # landing marks grow/shrink with stone size (22 = normal size)
-const MARKER_SCALE_MIN := 0.8
-const MARKER_SCALE_MAX := 1.5
 
 ## "sprite" = standing pose, "windup_sprite" = about to throw.
 ## "hand" = where the stone leaves from, relative to the enemy center.
-## "windup_time" = how long the enemy telegraphs before throwing (the landing mark shows during it).
+## "windup_time" = how long the enemy telegraphs (winds up / aims) before throwing.
 ## "icon" = HUD icon for this enemy.
 ## "aim_spread" = it aims at the wall up to this far left/right of where it stands
 ##                (the build screen shows these spots in red).

@@ -34,7 +34,7 @@ func _ready() -> void:
 
 func reset() -> void:
 	coins = ShopData.START_COINS
-	current_wall = 1
+	current_wall = clampi(LevelData.START_WALL, 1, LevelData.WALLS.size())
 	last_result = ""
 	enemies_defeated = 0
 	falls = 0

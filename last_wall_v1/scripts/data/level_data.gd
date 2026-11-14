@@ -10,12 +10,16 @@
 ## "tip"           = shown under the wall name when the wave starts
 ## "boss"          = this wall is a boss fight (see BOSS in enemy_data.gd) instead of "enemies"
 
+## For testing your balance: the game starts at this wall (1 = normal). Coins / bricks to start with:
+## START_COINS in shop_data.gd, START_BRICKS in brick_data.gd. Put them back before you publish!
+const START_WALL := 1
+
 const WALLS := [
 	{
 		"title": "The Last Wall",
 		"king": "King Aldren",
 		"foundation": "foundation_1", "backdrop": "sky", "far_wall": "foundation_2", "ground": "ground",
-		"tip": "Move with A / D or the arrow keys.  Stand on the red marks to block.",
+		"tip": "Move with A / D or the arrow keys.  Get under the cannonballs to bounce them back.",
 		"foundation_hp": 40,
 		"prebuilt_hp": 20,
 		"max_stones": 2,

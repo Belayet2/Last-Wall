@@ -53,7 +53,7 @@ func _ready() -> void:
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.custom_minimum_size = Vector2(700, 0)
 	col.add_child(info)
-	var how := UI.label("Click a column to lay a brick on top.  Right-click takes the top brick off.  Red strips = where the enemies aim.", 15, UI.INK)
+	var how := UI.label("Click or drag across the wall to lay bricks (one per column per drag).  Right-click or right-drag takes them off.  Red strips = where the enemies aim.", 15, UI.INK)
 	how.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	how.custom_minimum_size = Vector2(700, 0)
 	col.add_child(how)
