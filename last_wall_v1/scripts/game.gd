@@ -2,6 +2,7 @@ extends Node2D
 ## The play field for the current wall: builds the world, wall, hero, enemies (or the boss) and HUD,
 ## and runs the "Bounce Back" loop:
 ##   build      -> lay your bricks on the wall (the enemies wait), then Fight!
+##                 (not on the Last Wall: it is always whole, you never build on it)
 ##   wave cleared -> the bricks still standing are mended, retake bonus, then Shop / Next Wall.
 ##                   The next wall has only its last layer left: you build on it. Last wall: Victory.
 ##   a last-layer brick breaks -> the wall falls: fall back one wall (or Game Over on Wall 1)
@@ -18,6 +19,7 @@ const BossScript = preload("res://scripts/boss.gd")
 const EnemyData = preload("res://scripts/data/enemy_data.gd")
 const HudScript = preload("res://scripts/hud.gd")
 const FxScript = preload("res://scripts/fx.gd")
+const Scenery = preload("res://scripts/scenery.gd")
 
 var _level: Dictionary
 var _wall: WallScript
@@ -80,16 +82,33 @@ func _ready() -> void:
 	_start_building()
 
 
-## Background used by the game and the main menu (wall_number picks the backdrop and ground).
+## Background used by the game, the main menu and the story (wall_number picks the backdrop and ground):
+## the sky (or sea) with the next wall out, broken, at the top; the field; the path; and a brick
+## side wall on each side, made of this wall's own bricks.
 static func build_world(parent: Node, wall_number: int = 1) -> void:
 	var level: Dictionary = LevelData.WALLS[wall_number - 1]
 	var cx := GameData.SCREEN_WIDTH * 0.5
 	_add_bg(parent, level["backdrop"], Vector2(cx, GameData.RUINS_TOP + GameData.RUINS_HEIGHT * 0.5), false, -10)
+	if level.has("far_wall"):
+		var stands := []
+		var count: int = (level["enemies"] as Array).size()
+		for i in range(count):
+			stands.append(enemy_x(i, count))
+		var far := Scenery.enemy_wall(level["far_wall"], 7000 + wall_number * 37, stands)
+		far.z_index = -9
+		parent.add_child(far)
 	_add_bg(parent, level["ground"], Vector2(cx, GameData.GROUND_TOP + GameData.GROUND_HEIGHT * 0.5), false, -10)
 	_add_bg(parent, "path", Vector2(cx, GameData.PATH_TOP + GameData.PATH_HEIGHT * 0.5), false, -10)
-	var rocks_y := GameData.GROUND_TOP + (GameData.GROUND_HEIGHT + GameData.PATH_HEIGHT) * 0.5
-	_add_bg(parent, "edge_rocks", Vector2(GameData.EDGE_ROCKS_X, rocks_y), false, -9)
-	_add_bg(parent, "edge_rocks", Vector2(GameData.SCREEN_WIDTH - GameData.EDGE_ROCKS_X, rocks_y), true, -9)
+	for right in [false, true]:
+		var side := Scenery.side_wall(level["foundation"], right)
+		side.z_index = -4
+		parent.add_child(side)
+
+
+## Where enemy number i (of count) stands, left to right.
+static func enemy_x(i: int, count: int) -> float:
+	var field_width := GameData.FIELD_RIGHT - GameData.FIELD_LEFT
+	return GameData.FIELD_LEFT + field_width * (i + 1) / (count + 1)
 
 
 static func _add_bg(parent: Node, key: String, center: Vector2, flip: bool, z: int) -> void:
@@ -103,17 +122,17 @@ static func _add_bg(parent: Node, key: String, center: Vector2, flip: bool, z: i
 # ---------------------------------------------------------------- build, then fight
 
 func _start_building() -> void:
+	if GameState.is_prebuilt(GameState.current_wall):
+		_start_fight()                   # the Last Wall is already whole: straight into the fight
+		return
 	_set_fighters_active(false)
 	_hud.open_build(_wall, _danger_map(), _build_intro())
 
 
 func _build_intro() -> String:
-	var number := GameState.current_wall
 	var text := ""
-	if number == 1 and _arrived_fresh and GameState.falls == 0 and GameState.enemies_defeated == 0:
-		text = "The king gives you %d clay bricks. Lay them on top of the last layer (the bottom row). " % GameState.total_bricks()
-	elif _arrived_fresh:
-		text = "The enemy left only the last layer (the bottom row). Build on top of it with the bricks you bought. "
+	if _arrived_fresh:
+		text = "The enemy left only the last layer of this wall (the bottom row). Build on top of it with the bricks you bought in the Shop. "
 	else:
 		text = "Your bricks are still here, mended. Add more if you have them. "
 	return text + "If ANY brick of the last layer breaks, the wall falls!"
@@ -170,11 +189,10 @@ func _danger_map() -> Array:
 func _spawn_enemies(level: Dictionary) -> void:
 	var types: Array = level["enemies"]
 	var count := types.size()
-	var field_width := GameData.FIELD_RIGHT - GameData.FIELD_LEFT
 	for i in range(count):
 		var enemy := EnemyScript.new()
 		enemy.setup(types[i], i, level["max_stones"], _stones, _markers)
-		enemy.position = Vector2(GameData.FIELD_LEFT + field_width * (i + 1) / (count + 1), GameData.ENEMY_Y)
+		enemy.position = Vector2(enemy_x(i, count), GameData.ENEMY_Y)
 		enemy.died.connect(_on_enemy_died)
 		add_child(enemy)
 		_enemies.append(enemy)
@@ -247,8 +265,9 @@ func _on_wave_cleared() -> void:
 	var next := GameState.current_wall
 	_continue_text = "Go to Wall %d" % next
 	var note := "Only its last layer is left: buy bricks to build on it." if GameState.arriving_fresh() else ""
+	var mended := "The Last Wall is whole again." if GameState.is_prebuilt(number) else "Your bricks are mended."
 	_end("Wall %d Held!" % number,
-		"Your bricks are mended. Retake bonus: +%d coins.\nNext: Wall %d - %s\n%s" % [bonus, next, GameState.wall_title(next), note],
+		"%s Retake bonus: +%d coins.\nNext: Wall %d - %s\n%s" % [mended, bonus, next, GameState.wall_title(next), note],
 		[["Shop", "shop", false], ["Next Wall", "next", true]])
 
 

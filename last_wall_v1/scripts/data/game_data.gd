@@ -1,11 +1,11 @@
 ## Layout and core feel numbers. Tune freely.
 
-# --- Play field (full 1280 width; rocky edges on both sides) ---
+# --- Play field (full 1280 width; a brick side wall on both sides) ---
 const SCREEN_WIDTH := 1280.0
-const FIELD_LEFT := 34.0        # stones bounce off the rocks here
-const FIELD_RIGHT := 1246.0
+const SCREEN_HEIGHT := 720.0
+const FIELD_LEFT := 64.0        # stones bounce off the side walls here (one brick wide)
+const FIELD_RIGHT := 1216.0
 const FIELD_CENTER_X := 640.0
-const EDGE_ROCKS_X := 20.0      # center of the left rock strip (right one is mirrored)
 
 # --- Rows from top to bottom ---
 const RUINS_TOP := 0.0

@@ -61,6 +61,7 @@ func add_coins(amount: int) -> void:
 # Each wall is saved as a "layout": one Array per column, bottom brick first.
 # A brick is {"type": "foundation" / "clay" / ..., "hp": int, "max": int}.
 # An empty layout ([]) = the enemy holds that wall: you arrive to its last layer only.
+# The Last Wall ("prebuilt_hp" in level_data.gd) is different: it is always whole when you fight on it.
 
 func wall_count() -> int:
 	return LevelData.WALLS.size()
@@ -70,27 +71,46 @@ func wall_title(number: int) -> String:
 	return LevelData.WALLS[number - 1]["title"]
 
 
-## The layout to fight on now: the saved one, or a fresh last layer (you just arrived).
+## The layout to fight on now: the saved one, or the wall as you find it when you arrive.
 func current_layout() -> Array:
 	var saved: Array = wall_layouts[current_wall - 1]
 	if not saved.is_empty():
 		return saved.duplicate(true)
-	var hp: int = LevelData.WALLS[current_wall - 1]["foundation_hp"]
+	return fresh_layout(current_wall)
+
+
+## A wall as you find it: only its last layer (the enemy broke the rest),
+## or, for the Last Wall, whole: every row of its own stone.
+func fresh_layout(number: int) -> Array:
+	var level: Dictionary = LevelData.WALLS[number - 1]
+	var hp: int = level["foundation_hp"]
+	var upper: int = level.get("prebuilt_hp", 0)
+	var rows := BrickData.ROWS if upper > 0 else 1
 	var fresh := []
 	for i in range(BrickData.COLUMNS):
-		fresh.append([{"type": "foundation", "hp": hp, "max": hp}])
+		var column := [{"type": "foundation", "hp": hp, "max": hp}]
+		for r in range(1, rows):
+			column.append({"type": "foundation", "hp": upper, "max": upper})
+		fresh.append(column)
 	return fresh
+
+
+## True for the Last Wall: it is always whole, and you never build on it.
+func is_prebuilt(number: int) -> bool:
+	return LevelData.WALLS[number - 1].has("prebuilt_hp")
 
 
 ## True if the hero arrives at a wall the enemy held (only the last layer is left).
 func arriving_fresh() -> bool:
-	return wall_layouts[current_wall - 1].is_empty()
+	return wall_layouts[current_wall - 1].is_empty() and not is_prebuilt(current_wall)
 
 
-## The wave on the current wall was cleared: every brick still standing is mended,
-## the wall is saved, and the retake bonus is paid. Returns the bonus.
+## The wave on the current wall was cleared: every brick still standing is mended
+## (the Last Wall is rebuilt whole), the wall is saved, and the retake bonus is paid. Returns the bonus.
 func wave_cleared(layout: Array) -> int:
 	var saved := layout.duplicate(true)
+	if is_prebuilt(current_wall):
+		saved = fresh_layout(current_wall)
 	for column in saved:
 		for brick in column:
 			brick["hp"] = brick["max"]

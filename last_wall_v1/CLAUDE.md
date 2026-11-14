@@ -221,16 +221,16 @@ These replace the older rules above where they disagree.
 | Wall | Name | King | Max HP | Enemies | Look |
 |---|---|---|---|---|---|
 | 1 | The Last Wall | Aldren | 300 | 3 Throwers | white stone |
-| 2 | Berin's Wall | Berin | 260 | 2 Throwers + 2 Slingers | sandstone |
-| 3 | Corwin's Wall | Corwin | 220 | 2 Throwers + 2 Slingers + 1 Catapult | red brick |
-| 4 | Doran's Wall | Doran | 190 | 2 of each type | mossy stone with ivy |
-| 5 | The Sea Wall | Edmund | 180 | **Boss: The Iron Flagship** | blue-grey sea stone |
+| 2 | The Wall of Edmund | Edmund | 260 | 2 Throwers + 2 Slingers | sandstone |
+| 3 | The Wall of Raiyon | Raiyon | 220 | 2 Throwers + 2 Slingers + 1 Catapult | red brick |
+| 4 | The Wall of Vegas | Vegas | 190 | 2 of each type | mossy stone with ivy |
+| 5 | The Wall of Zoa (on the shore) | Zoa | 180 | **Boss: The Iron Flagship** | blue-grey sea stone |
 
   Every wall has its own last-layer brick (`foundation_N`, see section 12). The top of the screen shows the next wall out in ruins (`ruins_N`); on wall 5 it is the sea, and the field is a beach.
 - Only **3 regular enemy types** (Cannon (was Thrower, see section 13), Slinger, Catapult) + the boss.
 - **Boss (wall 5, `scripts/boss.gd`, numbers in `EnemyData.BOSS` and `FxData`):** an enemy ship on the sea, side view, cannons facing the shore. It sails in (horn, shake, big name banner), then roams left/right. Before each volley it stops, glows, and red marks appear for every cannonball. Volleys are a "sweep" (balls land one after another, stepping sideways: you must move) or a "cluster" (close together: one block catches them all). At 2/3 and 1/3 HP it gets angrier (banner, more balls per volley, faster, smoke then fire). Boss HP bar replaces the enemy icons. On death: chain of explosions, it sinks, longer victory pause. Bounced cannonballs turn gold like stones.
 - ~~Pay to repair~~: replaced by the brick wall (section 12).
-- **Story in text, no voice** (`scripts/ui/story.gd`, text in `story_data.gd`): 7 pictures with a slow zoom and crossfade. A narrator's text types out in a large, solid parchment box at the bottom, then waits for click / Space (first click shows the whole line). Skip story button. End screens show a closing narrator line. No voice files are used.
+- **Story in text, no voice** (`scripts/ui/story.gd`, text in `story_data.gd`): 7 animated scenes (section 14). A narrator's text types out in a large, solid parchment box at the bottom, then waits for click / Space (first click shows the whole line). Skip story button. End screens show a closing narrator line. No voice files are used.
 - Balance (bot tests): a decent player wins all 5 walls in ~6 min; a casual player in ~8 min with about one fall-back. With full upgrades the boss fight lasts ~55-65 s.
 
 ---
@@ -259,3 +259,24 @@ The wall works like a brick-breaker game turned upside down (`scripts/wall.gd`, 
 - **Enemy-side walls** (`ruins_1-4.png`) are drawn by `tools/make_ruins_art.gd` from the brick pictures, built like our wall: columns of bricks (40 x 14, smaller because far away) on that wall's own last layer, with breaches (one goes through the last layer: that's how it fell), chipped tops, cracks, fallen bricks in front, red banners. `sea.png` (wall 5) is unchanged.
 - `ArtData` supports frame strips (`"frames"` key; `hframes` on the sprite, size = one frame).
 - Tools: `make_brick_art.gd` (bricks from texture packs), `make_cannon_coin_art.gd` (cannon + coin sheets), `make_ruins_art.gd` (enemy-side walls from the bricks). After changing PNGs from a script, run `godot --headless --path . --import` before playing headless.
+
+---
+
+## 14. The Last Wall, the new story, side walls and enemy side (user request)
+
+- **The Last Wall (Wall 1) is never built by the player.** It starts whole: all 4 rows of its own white stone (`prebuilt_hp` in `level_data.gd`: last layer 40, upper rows 20). No build screen on it; after every win on it, it is rebuilt whole. The player only builds on Walls 2-5. No starting bricks.
+- **Story (user's text, cleaned up):** five kings built five walls **from the sea inland**: Zoa (first, on the shore, the oldest, loved), Vegas, Raiyon, Edmund, Aldren (the strongest: the Last Wall, in front of our home). Zoa's fell first. In the game: Wall 1 = Aldren's Last Wall, 2 = Edmund's, 3 = Raiyon's, 4 = Vegas's, 5 = Zoa's on the shore (boss). Names come from `level_data.gd` ("king"), so the story scenes follow if they change.
+  - The user's draft said the walls were built "further out until the fifth stood at the edge of the sea", which contradicts Zoa's falling first and Aldren's being the last thing between the sea and home. Scene 1 was changed to "each one further from the sea" (told to the user).
+- **Story scenes are drawn live** (`scripts/ui/story_scene.gd`) from the game's own pictures, and follow the text with cues (a word in the text fires an event; showing all text fires the rest):
+  1. `walls_rise`: side-view panorama, sea on the left, the 5 walls rise brick by brick, the town grows inland, castle behind the Last Wall.
+  2. `kings`: name plates under each wall, glow on Zoa's ("the first wall") and Aldren's ("the strongest"), "THE LAST WALL" title.
+  3. `war`: raider ships fire, our soldiers bounce the balls back, ships sink; sunset, two soldiers fade, swords and shields as graves.
+  4. `sails`: from the battlements of Zoa's wall, a watchman (hero look); more and more sails on the horizon.
+  5. `walls_fall`: the panorama; Zoa's, Vegas's, Raiyon's, Edmund's walls crumble to their last layer under red flags; the Last Wall glows.
+  6. `king_calls`: throne room built of the Last Wall's bricks, the king on his throne, the mythical shield on a stand wakes up (aura, sparkles, light), speech bubble "Call the hero."
+  7. `hero`: the game view, bigger: cannons fire, the hero's aura bounces the balls back gold, coins pop.
+  A slide can use a picture instead ("image" key in `story_data.gd`).
+- **Side walls:** the field's left/right edges are brick walls (one 64 px brick wide, running bond, the current wall's own bricks), full height. `FIELD_LEFT/RIGHT` = 64 / 1216 (stones bounce there). The old edge rocks and the corner towers are gone.
+- **Enemy side (walls 1-4):** `sky.png` + a broken wall drawn by `scripts/scenery.gd` (`enemy_wall`) from the next wall's bricks: 48 x 16 bricks (far away), last layer + 3 rows + battlements, broken the way our wall breaks (whole bricks out, cracks around holes, one breach through the last layer placed between the enemies), small rubble, red enemy banners. Wall 5 keeps `sea.png`.
+- `scripts/scenery.gd` = shared builder: bricks redrawn sharp at any size (cached), walls from text maps, side walls, enemy wall, banners, flags, clouds.
+- Balance (bot tests): good ~3 min, sloppy ~5 min, casual 5-8 min with 0-2 falls. An idle hero cannot break the Last Wall (it held 4-5 min while the standing shield slowly knocked out the cannons).

@@ -33,26 +33,15 @@ const SPRITES := {
 	"brick_slot": {"path": "res://assets/sprites/brick_slot.png", "size": Vector2(64, 22)},
 	"ground": {"path": "res://assets/sprites/ground.png", "size": Vector2(1280, 400)},
 	"path": {"path": "res://assets/sprites/path.png", "size": Vector2(1280, 75)},
-	# enemy side at the top: the next wall in ruins (walls 1-4), the sea (wall 5)
-	"ruins_1": {"path": "res://assets/sprites/ruins_1.png", "size": Vector2(1280, 150)},
-	"ruins_2": {"path": "res://assets/sprites/ruins_2.png", "size": Vector2(1280, 150)},
-	"ruins_3": {"path": "res://assets/sprites/ruins_3.png", "size": Vector2(1280, 150)},
-	"ruins_4": {"path": "res://assets/sprites/ruins_4.png", "size": Vector2(1280, 150)},
+	# enemy side at the top: sky (walls 1-4, the broken wall in front of it is drawn from the bricks), the sea (wall 5)
+	"sky": {"path": "res://assets/sprites/sky.png", "size": Vector2(1280, 150)},
 	"sea": {"path": "res://assets/sprites/sea.png", "size": Vector2(1280, 150)},
 	"beach": {"path": "res://assets/sprites/beach.png", "size": Vector2(1280, 400)},
 	# boss
 	"ship": {"path": "res://assets/sprites/ship.png", "size": Vector2(252, 140)},
 	"cannonball": {"path": "res://assets/sprites/cannonball.png", "size": Vector2(22, 22)},
-	"edge_rocks": {"path": "res://assets/sprites/edge_rocks.png", "size": Vector2(40, 475)},
 	"marker": {"path": "res://assets/sprites/marker.png", "size": Vector2(56, 18)},
-	# story and end screens (drawn small, shown big)
-	"story_map": {"path": "res://assets/sprites/story_map.png", "size": Vector2(1280, 720)},
-	"story_kings": {"path": "res://assets/sprites/story_kings.png", "size": Vector2(1280, 720)},
-	"story_field": {"path": "res://assets/sprites/story_field.png", "size": Vector2(1280, 720)},
-	"story_ships": {"path": "res://assets/sprites/story_ships.png", "size": Vector2(1280, 720)},
-	"story_map_fallen": {"path": "res://assets/sprites/story_map_fallen.png", "size": Vector2(1280, 720)},
-	"story_king_calls": {"path": "res://assets/sprites/story_king_calls.png", "size": Vector2(1280, 720)},
-	"story_hero": {"path": "res://assets/sprites/story_hero.png", "size": Vector2(1280, 720)},
+	# end screens (the story scenes are drawn in the game from these pictures and the bricks)
 	"story_throne_room": {"path": "res://assets/sprites/story_throne_room.png", "size": Vector2(1280, 720)},
 	"portrait_king": {"path": "res://assets/sprites/portrait_king.png", "size": Vector2(288, 336)},
 	"portrait_commander": {"path": "res://assets/sprites/portrait_commander.png", "size": Vector2(288, 336)},

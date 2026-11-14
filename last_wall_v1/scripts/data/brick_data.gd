@@ -20,8 +20,8 @@ const DROP_HEIGHT := 26.0           # a placed brick drops in from this high
 const DANGER_COLOR := Color(0.9, 0.2, 0.15)
 const DANGER_ALPHA_MAX := 0.85      # build screen: red strip over the columns enemies aim at most
 
-# --- Bricks you start the game with (a gift from the king) ---
-const START_BRICKS := {"clay": 12}
+# --- Bricks you start the game with (none: the Last Wall is already whole, you build from Wall 2 on) ---
+const START_BRICKS := {}
 
 ## Bricks you can buy. "hp" = how much damage it takes before it breaks.
 ## A cannon's ball does 8, a slinger's stone 5, a catapult boulder 20, the flagship's cannonball 12.

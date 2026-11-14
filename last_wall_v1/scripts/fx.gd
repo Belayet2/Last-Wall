@@ -43,9 +43,17 @@ func hit_stop() -> void:
 
 ## One-shot burst of pixel squares. `preset` is a dictionary from fx_data.gd.
 func burst(pos: Vector2, preset: Dictionary, direction: Vector2 = Vector2.ZERO) -> void:
+	var p := make_burst(pos, preset, direction)
+	if p:
+		add_child(p)
+		p.emitting = true
+
+
+## The burst itself (add it as a child anywhere, then set emitting = true). Null if the preset is off.
+static func make_burst(pos: Vector2, preset: Dictionary, direction: Vector2 = Vector2.ZERO) -> CPUParticles2D:
 	var amount: int = preset["amount"]
 	if amount <= 0:
-		return
+		return null
 	var p := CPUParticles2D.new()
 	p.position = pos
 	p.one_shot = true
@@ -65,9 +73,8 @@ func burst(pos: Vector2, preset: Dictionary, direction: Vector2 = Vector2.ZERO) 
 	if preset.has("rect"):
 		p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 		p.emission_rect_extents = preset["rect"]
-	add_child(p)
-	p.emitting = true
 	p.finished.connect(p.queue_free)
+	return p
 
 
 ## Continuous trail; add it as a child of a moving node (used for gold stones).

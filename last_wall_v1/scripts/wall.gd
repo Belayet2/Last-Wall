@@ -42,13 +42,7 @@ func _ready() -> void:
 	bed.modulate = Color(0.7, 0.64, 0.58)
 	bed.z_index = -5
 	add_child(bed)
-	for side in [0, 1]:                       # a tower of old stone at each end
-		var x := BrickData.COLUMN_LEFT * 0.5 if side == 0 else GameData.SCREEN_WIDTH - BrickData.COLUMN_LEFT * 0.5
-		for row in range(BrickData.ROWS):
-			var s := ArtData.make_sprite(foundation_art, Vector2(BrickData.COLUMN_LEFT, BrickData.BRICK_H))
-			s.position = Vector2(x, _row_y(row))
-			s.modulate = Color(0.85, 0.85, 0.85)
-			add_child(s)
+
 	for col in range(BrickData.COLUMNS):
 		var stack: Array[Sprite2D] = []
 		_sprites.append(stack)
@@ -87,7 +81,7 @@ func damage(col: int, amount: int, hit_pos: Vector2) -> void:
 		if fx:
 			fx.shake(FxData.SHAKE_WALL_HIT)
 	else:
-		_break_brick(col, fx)
+		_break_brick(col, fx, row == 0)
 	if row == 0:
 		var weakest := weakest_foundation()
 		foundation_changed.emit(weakest.x, weakest.y)
@@ -331,14 +325,13 @@ func _hit_wobble(s: Sprite2D) -> void:
 	s.create_tween().tween_property(s, "modulate", Color.WHITE, 0.2)
 
 
-func _break_brick(col: int, fx: Node) -> void:
+func _break_brick(col: int, fx: Node, last_layer: bool) -> void:
 	var brick: Dictionary = (_layout[col] as Array).pop_back()
 	var s: Sprite2D = (_sprites[col] as Array).pop_back()
-	var last_layer: bool = brick["type"] == "foundation"
 	GameState.audio.play("wall_crack")
 	if fx:
 		var rubble: Dictionary = FxData.BRICK_RUBBLE.duplicate()
-		rubble["color"] = FxData.WALL_RUBBLE["color"] if last_layer else BrickData.TYPES[brick["type"]]["color"]
+		rubble["color"] = FxData.WALL_RUBBLE["color"] if brick["type"] == "foundation" else BrickData.TYPES[brick["type"]]["color"]
 		fx.burst(s.global_position, rubble)
 		fx.shake(FxData.SHAKE_WALL_CRACK if last_layer else FxData.SHAKE_BRICK_BREAK)
 	var fall := s.create_tween().set_parallel(true)

@@ -126,6 +126,18 @@ const SPLASH := {
 	"size_min": 3.0, "size_max": 6.0, "color": Color(0.85, 0.95, 1.0),
 	"rect": Vector2(120, 6),
 }
+## Story scenes: smaller versions (walls and ships are far away there).
+const WALL_RUBBLE_SMALL := {
+	"amount": 24, "lifetime": 0.7, "direction": Vector2(0, -1), "spread": 60.0,
+	"speed_min": 40.0, "speed_max": 110.0, "gravity": Vector2(0, 380), "damping": 10.0,
+	"size_min": 2.0, "size_max": 4.0, "color": Color(0.62, 0.58, 0.52),
+	"rect": Vector2(40, 30),
+}
+const EXPLOSION_SMALL := {
+	"amount": 22, "lifetime": 0.5, "direction": Vector2(0, -1), "spread": 180.0,
+	"speed_min": 50.0, "speed_max": 150.0, "gravity": Vector2(0, 150), "damping": 60.0,
+	"size_min": 3.0, "size_max": 6.0, "color": Color(1.0, 0.6, 0.15),
+}
 ## Continuous smoke / fire on the damaged flagship.
 const SHIP_SMOKE := {
 	"amount": 24, "lifetime": 1.4, "size_min": 5.0, "size_max": 10.0,

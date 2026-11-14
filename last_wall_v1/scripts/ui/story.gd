@@ -1,24 +1,25 @@
 extends Control
-## The opening story: a slideshow of pictures, told in text by a narrator.
-## The text types out, then waits: click / Space / Enter = show all text, then next picture.
+## The opening story: 7 animated scenes, told in text by a narrator.
+## The text types out, then waits: click / Space / Enter = show all text, then next scene.
+## Each scene follows the text (story_scene.gd): things happen when the text reaches certain words.
 ## "Skip story" jumps straight into the game.
 
 const StoryData = preload("res://scripts/data/story_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
+const StoryScene = preload("res://scripts/ui/story_scene.gd")
 const UI = preload("res://scripts/ui/ui_style.gd")
 
 const BOX_WIDTH := 1100.0
 const BOX_BOTTOM_GAP := 22.0
 
 var _index := -1
-var _pictures: Array[TextureRect] = []
-var _front := 0
+var _stage: Control                 # the current scene (and the one fading out) live here
+var _current: CanvasItem
 var _box: PanelContainer
 var _text: Label
 var _hint: Label
 var _dots: Array[ColorRect] = []
 var _typing: Tween
-var _zoom: Tween
 var _hint_pulse: Tween
 var _leaving := false
 
@@ -31,21 +32,16 @@ func _ready() -> void:
 	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	black.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(black)
-	for i in range(2):                       # two pictures that crossfade
-		var pic := TextureRect.new()
-		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		pic.stretch_mode = TextureRect.STRETCH_SCALE
-		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		pic.pivot_offset = Vector2(640, 360)
-		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		pic.modulate.a = 0.0
-		add_child(pic)
-		_pictures.append(pic)
+	_stage = Control.new()
+	_stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stage.clip_contents = true
+	add_child(_stage)
 
-	# soft shadow at the bottom so the text box stands out from any picture
+	# soft shadow at the bottom so the text box stands out from any scene
 	var shade := TextureRect.new()
 	var grad := Gradient.new()
-	grad.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.45)])
+	grad.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.4)])
 	var gt := GradientTexture2D.new()
 	gt.gradient = grad
 	gt.fill_from = Vector2(0, 0)
@@ -53,8 +49,8 @@ func _ready() -> void:
 	shade.texture = gt
 	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	shade.stretch_mode = TextureRect.STRETCH_SCALE
-	shade.position = Vector2(0, 420)
-	shade.size = Vector2(1280, 300)
+	shade.position = Vector2(0, 440)
+	shade.size = Vector2(1280, 280)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
 
@@ -96,6 +92,12 @@ func _ready() -> void:
 	_next()
 
 
+func _process(_delta: float) -> void:
+	if _current and _current.has_method("reveal"):
+		var shown := _text.text.length() if _text.visible_ratio >= 1.0 else int(_text.visible_ratio * _text.text.length())
+		_current.call("reveal", shown)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	var mouse := event as InputEventMouseButton
 	var clicked := mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
@@ -121,22 +123,19 @@ func _next() -> void:
 	for i in range(_dots.size()):
 		_dots[i].color = UI.PIP_ON if i <= _index else UI.PIP_OFF
 
-	# crossfade to the new picture, which slowly zooms in
-	var old := _pictures[_front]
-	_front = 1 - _front
-	var pic := _pictures[_front]
-	pic.texture = ArtData.texture(slide["image"])
-	pic.scale = Vector2.ONE
-	move_child(pic, old.get_index())         # new picture goes under the old one, then the old fades out
-	pic.modulate.a = 1.0
-	create_tween().tween_property(old, "modulate:a", 0.0, StoryData.FADE_TIME)
-	if _zoom:
-		_zoom.kill()
-	_zoom = create_tween()
-	_zoom.tween_property(pic, "scale", Vector2.ONE * StoryData.ZOOM, 14.0)
+	# the new scene goes under the old one, then the old one fades out
+	var text: String = slide["text"]
+	var visual := _make_visual(slide, text)
+	_stage.add_child(visual)
+	_stage.move_child(visual, 0)
+	if _current:
+		var old := _current
+		var fade := old.create_tween()
+		fade.tween_property(old, "modulate:a", 0.0, StoryData.FADE_TIME)
+		fade.tween_callback(old.queue_free)
+	_current = visual
 
 	# the text types out, then the "continue" hint appears
-	var text: String = slide["text"]
 	_text.text = text
 	_text.visible_ratio = 0.0
 	_place_box()
@@ -149,6 +148,24 @@ func _next() -> void:
 	_typing = create_tween()
 	_typing.tween_property(_text, "visible_ratio", 1.0, text.length() / StoryData.TYPE_CHARS_PER_SECOND)
 	_typing.tween_callback(_show_hint)
+
+
+## The slide's animated scene, or your own picture if the slide has an "image".
+func _make_visual(slide: Dictionary, text: String) -> CanvasItem:
+	var image: String = slide.get("image", "")
+	if image != "":
+		var pic := TextureRect.new()
+		pic.texture = ArtData.texture(image)
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_SCALE
+		pic.size = Vector2(1280, 720)
+		pic.pivot_offset = Vector2(640, 360)
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pic.create_tween().tween_property(pic, "scale", Vector2.ONE * StoryData.ZOOM, 14.0)
+		return pic
+	var scene := StoryScene.new()
+	scene.setup(slide.get("scene", ""), text)
+	return scene
 
 
 ## Keeps the box centered at the bottom; it grows upward for longer text.

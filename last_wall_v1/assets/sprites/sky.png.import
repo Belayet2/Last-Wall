@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dg2ya714bwyxu"
-path="res://.godot/imported/ruins_1.png-42d70ab918febd7f9b8c01e9f179a20b.ctex"
+uid="uid://cgu6dptkwrhpr"
+path="res://.godot/imported/sky.png-e60347a03dfb00496d53d3cca2f20e8a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/ruins_1.png"
-dest_files=["res://.godot/imported/ruins_1.png-42d70ab918febd7f9b8c01e9f179a20b.ctex"]
+source_file="res://assets/sprites/sky.png"
+dest_files=["res://.godot/imported/sky.png-e60347a03dfb00496d53d3cca2f20e8a.ctex"]
 
 [params]
 

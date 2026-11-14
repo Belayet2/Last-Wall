@@ -27,17 +27,15 @@ Your picture can be **any size**. The game scales it to the "shown at" size belo
 | `brick_mud.png`, `brick_clay.png`, `brick_stone.png`, `brick_marble.png` | 64 × 22 | The 4 bricks you buy in the shop and lay on the wall |
 | `brick_cracks_1.png`, `brick_cracks_2.png` | 64 × 22 | Cracks drawn **on top of** a damaged brick (transparent picture, only the crack lines) |
 | `brick_slot.png` | 64 × 22 | Build screen: dashed outline where the next brick goes |
-| `ruins_1.png` … `ruins_4.png` | 1280 × 150 | The top of the screen on walls 1–4: sky and the **next** wall out, captured and broken. Drawn from the brick pictures by `tools/make_ruins_art.gd` (run it again after you change bricks) |
+| `sky.png` | 1280 × 150 | The top of the screen on walls 1–4: sky, with pale far hills low down (seen through the holes in the broken wall). The broken wall itself is drawn by the game from the brick pictures |
 | `sea.png` | 1280 × 150 | The top of the screen on wall 5: sky, sea and the far-away fleet |
 | `ground.png` | 1280 × 400 | The field on walls 1–4 |
 | `beach.png` | 1280 × 400 | The field on wall 5 (sea at the top, then sand) |
 | `path.png` | 1280 × 75 | The dirt path the hero walks on |
-| `edge_rocks.png` | 40 × 475 | Rocks at the left edge (the right edge uses it mirrored) |
 | `marker.png` | 56 × 18 | Red landing mark on the path |
 | `coin_spin.png` | 32 × 32 per frame | The coin: **a strip of 10 frames** (16 × 16 each) of a spinning coin. Spins in the HUD and pops out of defeated enemies |
 | `icon_wall.png`, `icon_coin.png`, `icon_brick.png` | 28 × 28, 32 × 32, 26 × 26 | Icons (`icon_coin` = still coin in the shop and build screen) |
 | `icon_cannon.png`, `icon_slinger.png`, `icon_catapult.png` | 37 × 26, 26 × 26, 30 × 26 | HUD enemy icons |
-| `story_map.png`, `story_kings.png`, `story_field.png`, `story_ships.png`, `story_map_fallen.png`, `story_king_calls.png`, `story_hero.png` | 1280 × 720 | The 7 story pictures, in order |
 | `story_throne_room.png` | 1280 × 720 | End screen background |
 | `portrait_king.png`, `portrait_commander.png` | 288 × 336 | Portraits on the win (king) and lose (commander) screens |
 
@@ -86,7 +84,7 @@ Free pixel-art tools: **Aseprite** (paid, best), **LibreSprite** (free), **Pixel
 | `enemy_catapult_windup.png` | The stone leaves from the top of the arm (`"hand"` in `enemy_data.gd`). |
 | `ship.png` | **Bow pointing right**, cannon holes at the 4 `"ports"` positions in `enemy_data.gd` (pixels in a 180 × 100 picture). |
 | `brick_*.png`, `foundation_N.png` | Fill the whole 64 × 22 picture: bricks sit edge to edge. A dark 1-px outline keeps them apart. |
-| `ruins_N.png`, `sea.png` | Enemies stand in front of the bottom ~15 px; the top ~80 px is mostly sky (the HUD panels sit there). |
+| `sky.png`, `sea.png` | The enemies (and the broken wall) stand at the bottom ~90 px; the top ~80 px is behind the HUD panels. |
 | `beach.png` | The ship floats on the water at the top (~60 px of sea), then sand. |
 
 **Hitboxes don't come from the pictures**, so changing a picture never breaks the gameplay.
@@ -95,9 +93,15 @@ Free pixel-art tools: **Aseprite** (paid, best), **LibreSprite** (free), **Pixel
 
 The project is set to **sharp pixels** ("Nearest" filtering), which suits pixel art. If you draw smooth, high-resolution art instead, open **Project → Project Settings → Rendering → Textures → Canvas Textures → Default Texture Filter** and set it to **Linear**, otherwise big smooth art looks jagged when scaled down.
 
-### Story pictures
+### The story and the scenery are made from your pictures
 
-The 7 story pictures (`story_*.png`) are drawn at 640 × 360 and shown at 1280 × 720. You can draw them at either size. Keep the important things in the **top two-thirds**: the bottom third is covered by the text box.
+These have **no picture files of their own**. The game draws them from the pictures above, so when you replace those, they change too:
+
+- **Side walls, the broken walls on the enemy side, the walls in the story:** the brick pictures (`foundation_N.png`, `brick_*.png`, `brick_cracks_*.png`).
+- **The story scenes:** the bricks plus `ship.png`, `hero.png`, `shield.png`, `portrait_king.png`, `enemy_cannon.png`, `cannonball.png`, `stone_returned.png` and `coin_spin.png`.
+
+**Your own picture for a story slide:** add it to `scripts/data/art_data.gd` (1280 × 720) and put its name in that slide's `"image"` in `scripts/data/story_data.gd`. Keep the important things in the **top 60%**: the text box covers the bottom.
+
 ## Sounds (`assets/audio/`)
 
 1. Get your sound as **.ogg** (best, small) or **.wav**.
