@@ -1,4 +1,4 @@
-# How to replace the art, sounds and the narrator's voice
+# How to replace the art and sounds
 
 Every picture and sound in Last Wall is a file with a fixed name. To use your own, **save your file with the same name over the old one**. You don't need to change any code.
 
@@ -33,9 +33,9 @@ Your picture can be **any size**. The game scales it to the "shown at" size belo
 | `marker.png` | 56 × 18 | Red landing mark on the path |
 | `icon_wall.png`, `icon_coin.png` | 28 × 28, 26 × 26 | HUD icons |
 | `icon_enemy.png`, `icon_slinger.png`, `icon_catapult.png` | 26 × 26 (catapult 30 × 26) | HUD enemy icons |
-| `story_map.png`, `story_kings.png`, `story_field.png`, `story_ships.png`, `story_map_fallen.png`, `story_king_calls.png`, `story_hero.png` | 1280 × 720 | The 7 pictures of the narrated story, in order |
+| `story_map.png`, `story_kings.png`, `story_field.png`, `story_ships.png`, `story_map_fallen.png`, `story_king_calls.png`, `story_hero.png` | 1280 × 720 | The 7 story pictures, in order |
 | `story_throne_room.png` | 1280 × 720 | End screen background |
-| `portrait_king.png`, `portrait_commander.png`, `portrait_messenger.png` | 288 × 336 | Portraits (the king and commander appear on the end screens) |
+| `portrait_king.png`, `portrait_commander.png` | 288 × 336 | Portraits on the win (king) and lose (commander) screens |
 
 **Boss ship cannons:** the cannonballs come out of 4 gun ports. Their positions are set in `scripts/data/enemy_data.gd` (`BOSS` → `"ports"`, in pixels of a 180 × 100 image). If your ship picture has its cannons somewhere else, change those numbers.
 
@@ -49,6 +49,36 @@ godot --headless --path . --script res://tools/make_placeholder_art.gd
 
 (It only draws files that are missing, so your own art is never overwritten.)
 
+## Making your own art: the easy way
+
+1. **Paint over the placeholder.** Open the existing PNG (for example `assets/sprites/hero.png`) in your art program and draw your version on top of it, at the **same size**. That keeps everything lined up: the hero's feet, the shield above his head, the door in the middle of the wall, the ship's cannons.
+2. **Save as PNG with transparency** (no white box around characters).
+3. **Save over the old file** with the same name, then switch back to Godot and press **F5**.
+4. **Save a backup first.** Before replacing art, commit in git (or copy the `assets/sprites` folder) so you can always go back.
+
+Free pixel-art tools: **Aseprite** (paid, best), **LibreSprite** (free), **Pixelorama** (free, made with Godot), **Piskel** (free, in the browser).
+
+### Things that must line up
+
+| Picture | What to keep in the same place |
+|---|---|
+| `hero.png` + `shield.png` | The hero's **feet at the bottom edge**, centered. The shield is drawn behind him, **centered 36 px above the middle of the hero picture** (the game places it, you just keep the shield centered in its own picture). |
+| `enemy_*_windup.png` | The stone in the raised hand. If your hand is somewhere else, change `"hand"` for that enemy in `scripts/data/enemy_data.gd` (pixels from the picture's center). |
+| `enemy_catapult_windup.png` | The stone leaves from the top of the arm (`"hand"` in `enemy_data.gd`). |
+| `ship.png` | **Bow pointing right**, cannon holes at the 4 `"ports"` positions in `enemy_data.gd` (pixels in a 180 × 100 picture). |
+| `wall_N_*.png` | Full width, door in the middle, top edge = top of the picture. |
+| `ruins_N.png`, `sea.png` | Enemies stand on the bottom ~15 px; the top ~60 px is sky (the HUD panels sit there). |
+| `beach.png` | The ship floats on the water at the top (~60 px of sea), then sand. |
+
+**Hitboxes don't come from the pictures**, so changing a picture never breaks the gameplay.
+
+### Pixel art or smooth art?
+
+The project is set to **sharp pixels** ("Nearest" filtering), which suits pixel art. If you draw smooth, high-resolution art instead, open **Project → Project Settings → Rendering → Textures → Canvas Textures → Default Texture Filter** and set it to **Linear**, otherwise big smooth art looks jagged when scaled down.
+
+### Story pictures
+
+The 7 story pictures (`story_*.png`) are drawn at 640 × 360 and shown at 1280 × 720. You can draw them at either size. Keep the important things in the **top two-thirds**: the bottom third is covered by the text box.
 ## Sounds (`assets/audio/`)
 
 1. Get your sound as **.ogg** (best, small) or **.wav**.
@@ -71,11 +101,5 @@ godot --headless --path . --script res://tools/make_placeholder_art.gd
 | `cannon` / `ship_hit` / `explosion` / `boss_horn` | The boss fires / gets hit / blows up / arrives or gets angry |
 
 There is no background music. (If you want some later, it needs a small code change in `scripts/audio.gd`.)
-
-## The narrator's voice (`assets/audio/voice/`)
-
-The script to read, with the file name for every line, is in **`assets/audio/voice/NARRATION_SCRIPT.md`**.
-Save each line as `narration_01.ogg` … `narration_07.ogg`, `narration_win.ogg`, `narration_lose.ogg` in that folder.
-Until a file exists, the game shows the text for a few seconds instead. The on-screen text lives in `scripts/data/story_data.gd`.
 
 Free sound tools: **jsfxr** (sfxr.me) for retro sound effects. Free packs: **Kenney.nl** (CC0). Always add what you use to `CREDITS.txt`.

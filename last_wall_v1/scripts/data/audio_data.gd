@@ -1,17 +1,15 @@
-## Sounds and the narrator's voice. Tune freely.
-## Files live in assets/audio/ (voice lines in assets/audio/voice/). For each name the game
+## Sound effects. Tune freely. (No music, no voice.)
+## Files live in assets/audio/. For each name the game
 ## loads "<name>.ogg" if it exists, otherwise "<name>.wav" (or .mp3).
 ## To replace a sound, drop in an .ogg (or .wav) with the same name.
 
 const FOLDER := "res://assets/audio/"
-const VOICE_FOLDER := "res://assets/audio/voice/"
 const EXTENSIONS := [".ogg", ".wav", ".mp3"]
 
 const SFX_VOLUME_DB := -4.0
-const VOICE_VOLUME_DB := 0.0
 const PITCH_JITTER := 0.06          # each sound plays at a slightly random pitch (+/- 6%)
 const SAME_SOUND_GAP := 0.04        # the same sound will not restart faster than this (seconds)
-const VOICES := 12                  # how many sounds can play at once
+const CHANNELS := 12                 # how many sounds can play at once
 
 ## name -> extra volume in dB (0 = normal, negative = quieter)
 const SOUNDS := {

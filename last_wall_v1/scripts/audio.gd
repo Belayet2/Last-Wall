@@ -1,9 +1,6 @@
 extends Node
-## Plays sound effects and the narrator's voice. Lives under the GameState autoload,
-## so a voice line keeps playing between scenes. Use: GameState.audio.play("bounce")
-## Press M to mute / unmute everything. (There is no background music.)
-
-signal voice_finished
+## Plays sound effects. Lives under the GameState autoload. Use: GameState.audio.play("bounce")
+## Press M to mute / unmute everything. (No music and no voice.)
 
 const AudioData = preload("res://scripts/data/audio_data.gd")
 
@@ -11,7 +8,6 @@ var _streams := {}           # name -> AudioStream
 var _last_played := {}       # name -> time (seconds)
 var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
-var _voice: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -22,14 +18,10 @@ func _ready() -> void:
 			_streams[sound_name] = stream
 		else:
 			push_warning("Missing sound: " + sound_name)
-	for i in range(AudioData.VOICES):
+	for i in range(AudioData.CHANNELS):
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_players.append(p)
-	_voice = AudioStreamPlayer.new()
-	_voice.volume_db = AudioData.VOICE_VOLUME_DB
-	_voice.finished.connect(func() -> void: voice_finished.emit())
-	add_child(_voice)
 
 
 func play(sound_name: String) -> void:
@@ -45,26 +37,6 @@ func play(sound_name: String) -> void:
 	p.volume_db = AudioData.SFX_VOLUME_DB + float(AudioData.SOUNDS[sound_name])
 	p.pitch_scale = 1.0 + randf_range(-AudioData.PITCH_JITTER, AudioData.PITCH_JITTER)
 	p.play()
-
-
-## Plays a narrator line from assets/audio/voice/ (e.g. "narration_01").
-## Returns false if that recording does not exist yet (the game then just shows the text).
-func play_voice(line_name: String) -> bool:
-	stop_voice()
-	var stream := _find(AudioData.VOICE_FOLDER, line_name)
-	if stream == null:
-		return false
-	_voice.stream = stream
-	_voice.play()
-	return true
-
-
-func stop_voice() -> void:
-	_voice.stop()
-
-
-func is_voice_playing() -> bool:
-	return _voice.playing
 
 
 ## Quit the game cleanly: stop every sound first, then close a moment later
@@ -88,8 +60,6 @@ func _stop_all() -> void:
 	for p in _players:
 		p.stop()
 		p.stream = null
-	_voice.stop()
-	_voice.stream = null
 	_streams.clear()
 
 

@@ -1,20 +1,25 @@
 extends Control
-## The narrated opening: a slideshow of pictures with the narrator's voice and subtitles.
-## A slide moves on when its voice line ends (or after a reading time if not recorded yet).
-## Click / Space / Enter = next slide. "Skip story" jumps straight into the game.
+## The opening story: a slideshow of pictures, told in text by a narrator.
+## The text types out, then waits: click / Space / Enter = show all text, then next picture.
+## "Skip story" jumps straight into the game.
 
 const StoryData = preload("res://scripts/data/story_data.gd")
 const ArtData = preload("res://scripts/data/art_data.gd")
 const UI = preload("res://scripts/ui/ui_style.gd")
 
+const BOX_WIDTH := 1100.0
+const BOX_BOTTOM_GAP := 22.0
+
 var _index := -1
 var _pictures: Array[TextureRect] = []
 var _front := 0
-var _subtitle: Label
 var _box: PanelContainer
+var _text: Label
+var _hint: Label
 var _dots: Array[ColorRect] = []
-var _wait := -1.0            # seconds left on this slide (-1 = waiting for the voice to end)
+var _typing: Tween
 var _zoom: Tween
+var _hint_pulse: Tween
 var _leaving := false
 
 
@@ -37,17 +42,35 @@ func _ready() -> void:
 		add_child(pic)
 		_pictures.append(pic)
 
-	_box = UI.panel(30, 16, true)
-	_box.position = Vector2(90, 560)
-	_box.custom_minimum_size = Vector2(1100, 130)
+	# soft shadow at the bottom so the text box stands out from any picture
+	var shade := TextureRect.new()
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.45)])
+	var gt := GradientTexture2D.new()
+	gt.gradient = grad
+	gt.fill_from = Vector2(0, 0)
+	gt.fill_to = Vector2(0, 1)
+	shade.texture = gt
+	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	shade.stretch_mode = TextureRect.STRETCH_SCALE
+	shade.position = Vector2(0, 420)
+	shade.size = Vector2(1280, 300)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
+
+	# the text box: solid parchment, big dark text, grows upward from the bottom
+	_box = UI.panel(34, 20, true)
+	_box.custom_minimum_size = Vector2(BOX_WIDTH, 0)
 	add_child(_box)
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 6)
+	col.add_theme_constant_override("separation", 10)
 	_box.add_child(col)
-	_subtitle = UI.label("", 22)
-	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_subtitle.custom_minimum_size = Vector2(1040, 72)
-	col.add_child(_subtitle)
+	_text = UI.label("", StoryData.TEXT_SIZE)
+	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_text.custom_minimum_size = Vector2(BOX_WIDTH - 68, 0)
+	_text.add_theme_constant_override("line_spacing", 6)
+	_text.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING   # box keeps its size while typing
+	col.add_child(_text)
 	var bottom := HBoxContainer.new()
 	col.add_child(bottom)
 	var dots := HBoxContainer.new()
@@ -57,11 +80,12 @@ func _ready() -> void:
 	bottom.add_child(dots)
 	for i in range(StoryData.SLIDES.size()):
 		var d := ColorRect.new()
-		d.custom_minimum_size = Vector2(10, 10)
+		d.custom_minimum_size = Vector2(12, 12)
 		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dots.add_child(d)
 		_dots.append(d)
-	bottom.add_child(UI.label("Click or press Space for the next picture", 15, UI.INK_SOFT))
+	_hint = UI.label("Click or press Space to continue  >", 18, UI.ACCENT)
+	bottom.add_child(_hint)
 
 	var skip := UI.button("Skip story", false, Vector2(160, 42), 18)
 	skip.focus_mode = Control.FOCUS_NONE     # so Space never presses it by accident
@@ -69,15 +93,7 @@ func _ready() -> void:
 	skip.pressed.connect(_start_game)
 	add_child(skip)
 
-	GameState.audio.voice_finished.connect(_on_voice_finished)
 	_next()
-
-
-func _process(delta: float) -> void:
-	if _wait > 0.0:
-		_wait -= delta
-		if _wait <= 0.0:
-			_next()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -86,7 +102,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if clicked or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
 		GameState.audio.play("click")
-		_next()
+		if _typing and _typing.is_running():
+			_typing.kill()                   # first click: show the whole text
+			_text.visible_ratio = 1.0
+			_show_hint()
+		else:
+			_next()
 
 
 func _next() -> void:
@@ -108,34 +129,47 @@ func _next() -> void:
 	pic.scale = Vector2.ONE
 	move_child(pic, old.get_index())         # new picture goes under the old one, then the old fades out
 	pic.modulate.a = 1.0
-	var fade := create_tween()
-	fade.tween_property(old, "modulate:a", 0.0, StoryData.FADE_TIME)
+	create_tween().tween_property(old, "modulate:a", 0.0, StoryData.FADE_TIME)
 	if _zoom:
 		_zoom.kill()
 	_zoom = create_tween()
 	_zoom.tween_property(pic, "scale", Vector2.ONE * StoryData.ZOOM, 14.0)
 
+	# the text types out, then the "continue" hint appears
 	var text: String = slide["text"]
-	_subtitle.text = text
-	_box.modulate.a = 0.0
-	create_tween().tween_property(_box, "modulate:a", 1.0, 0.4)
+	_text.text = text
+	_text.visible_ratio = 0.0
+	_place_box()
+	call_deferred("_place_box")
+	_hint.modulate.a = 0.0
+	if _hint_pulse:
+		_hint_pulse.kill()
+	if _typing:
+		_typing.kill()
+	_typing = create_tween()
+	_typing.tween_property(_text, "visible_ratio", 1.0, text.length() / StoryData.TYPE_CHARS_PER_SECOND)
+	_typing.tween_callback(_show_hint)
 
-	if GameState.audio.play_voice(slide["voice"]):
-		_wait = -1.0                         # move on when the voice line ends
-	else:
-		var words := text.split(" ").size()
-		_wait = maxf(StoryData.MIN_SLIDE_TIME, words * StoryData.SECONDS_PER_WORD)
+
+## Keeps the box centered at the bottom; it grows upward for longer text.
+func _place_box() -> void:
+	_box.reset_size()
+	var h := _box.get_combined_minimum_size().y
+	_box.position = Vector2((1280.0 - BOX_WIDTH) * 0.5, 720.0 - BOX_BOTTOM_GAP - h)
 
 
-func _on_voice_finished() -> void:
-	if _wait < 0.0 and not _leaving:
-		_wait = StoryData.PAUSE_AFTER_VOICE
+func _show_hint() -> void:
+	if _hint_pulse:
+		_hint_pulse.kill()
+	_hint.modulate.a = 1.0
+	_hint_pulse = create_tween().set_loops()
+	_hint_pulse.tween_property(_hint, "modulate:a", 0.35, 0.7).set_trans(Tween.TRANS_SINE)
+	_hint_pulse.tween_property(_hint, "modulate:a", 1.0, 0.7).set_trans(Tween.TRANS_SINE)
 
 
 func _start_game() -> void:
 	if _leaving:
 		return
 	_leaving = true
-	GameState.audio.stop_voice()
 	GameState.reset()
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
